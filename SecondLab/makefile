@@ -1,25 +1,34 @@
+
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -g
 
-all: lab2 tests
+MAIN_SRCS = main.cpp UI.cpp Error.cpp
+MAIN_OBJS = $(MAIN_SRCS:.cpp=.o)
+MAIN_TARGET = lab
 
-lab2: main.o UI.o Error.o
-	@$(CXX) $(CXXFLAGS) main.o UI.o Error.o -o lab2
+TEST_SRCS = tests.cpp
+TEST_OBJS = $(TEST_SRCS:.cpp=.o)
+TEST_TARGET = tests
 
-tests: tests.o UI.o Error.o
-	@$(CXX) $(CXXFLAGS) tests.o UI.o Error.o -o tests
+.PHONY: all clean run test
 
-main.o: main.cpp UI.h
-	@$(CXX) $(CXXFLAGS) -c main.cpp
 
-UI.o: UI.cpp UI.h
-	@$(CXX) $(CXXFLAGS) -c UI.cpp
+all: $(MAIN_TARGET) $(TEST_TARGET)
 
-tests.o: tests.cpp UI.h
-	@$(CXX) $(CXXFLAGS) -c tests.cpp
+$(MAIN_TARGET): $(MAIN_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(MAIN_TARGET) $(MAIN_OBJS)
 
-Error.o: Error.cpp Error.h
-	@$(CXX) $(CXXFLAGS) -c Error.cpp
+$(TEST_TARGET): $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	@cls && del *.o && del lab2 && del tests
+	@del /f /q *.o lab.exe tests.exe *.d
+
+run: $(MAIN_TARGET)
+	./$(MAIN_TARGET)
+
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)

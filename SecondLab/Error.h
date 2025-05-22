@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "Training.h"
+#include "Exeption.h"
 
 struct ErrorInfo {
     int code;
