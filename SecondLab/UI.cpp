@@ -28,6 +28,7 @@ void runUI() {
     bool running = true;
 
     while (running) {
+
         try {
             std::cout << "\n==== MENU ====\n"
                       << "1) Create sequence\n"
