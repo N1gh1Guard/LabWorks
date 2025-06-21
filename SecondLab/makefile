@@ -1,4 +1,3 @@
-
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra -g
 
@@ -12,21 +11,21 @@ TEST_TARGET = tests
 
 .PHONY: all clean run test
 
-
 all: $(MAIN_TARGET) $(TEST_TARGET)
 
 $(MAIN_TARGET): $(MAIN_OBJS)
-	$(CXX) $(CXXFLAGS) -o $(MAIN_TARGET) $(MAIN_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(TEST_TARGET): $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	@del /f /q *.o lab.exe tests.exe *.d
-
+	rm -f $(MAIN_OBJS) $(TEST_OBJS) $(MAIN_TARGET) $(TEST_TARGET) *.d
+	rm -f $(MAIN_OBJS) $(TEST_OBJS) $(MAIN_TARGET) $(TEST_TARGET) *.exe
+	
 run: $(MAIN_TARGET)
 	./$(MAIN_TARGET)
 
