@@ -18,9 +18,11 @@ public:
     bool IsNone() const { return !hasValue; }
 
     T Unwrap() const {
-        if (!hasValue) throw Errors[RUNTIME_ERROR].message;
+        if (!hasValue) 
+            std::cout << "[Warn] No value (Option).\n";
         return value;
     }
+    
     T UnwrapOr(const T& defaultVal) const {
         return hasValue ? value : defaultVal;
     }
