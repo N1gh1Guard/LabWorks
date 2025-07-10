@@ -57,3 +57,29 @@ std::pair<Sequence<T1>*, Sequence<T2>*> unzip(const Sequence<std::pair<T1, T2>>*
     }
     return {seq1, seq2};
 }
+
+template <typename T1, typename T2>
+void print(const Sequence<std::pair<T1, T2>>* seq) {
+    std::cout << "[ ";
+    if (seq->GetLength() != 0) {
+        std::cout << "(" << seq->Get(0).first << ", " << seq->Get(0).second << ")";
+    }
+    for (int i = 1; i < seq->GetLength(); i++) {
+        std::cout << ", " <<"(" << seq->Get(i).first << ", " << seq->Get(i).second << ")";
+    }
+    std::cout << " ]\n";
+    return;
+}
+
+template <class T>
+void print(const Sequence<T>* seq) {
+    std::cout << "[ ";
+    if (seq->GetLength() != 0) {
+        std::cout << seq->Get(0);
+    }
+    for (int i = 1; i < seq->GetLength(); i++) {
+        std::cout << ", " <<seq->Get(i);
+    }
+    std::cout << " ] \n";
+    return;
+}

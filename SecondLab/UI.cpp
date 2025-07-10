@@ -222,9 +222,7 @@ static void handlePrintAll(const std::vector<Sequence<int>*>& seqs) {
         auto* seq = seqs[i];
         std::cout << "Seq #" << i << " (" << seq->TypeName() 
             << ", len=" << seq->GetLength() << "): ";
-        for (int j = 0; j < seq->GetLength(); j++) {
-            std::cout << seq->Get(j) << " ";
-        }
+        print(seq);
         std::cout << "\n";
     }
 }
