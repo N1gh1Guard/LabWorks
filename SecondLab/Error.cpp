@@ -1,42 +1,60 @@
 #include "Error.h"
+#include "Exeption.h"
 #include <iostream>
 
 std::vector<ErrorInfo> g_ErrorTable = {
-    {0, "Menu input not an integer?"},
-    {1, "Array input was not integer?"},
-    {2, "Index < 0?"},
-    {3, "Index >= size?"},
-    {4, "start > end?"},
-    {5, "Empty?"},
-    {6, "Unknown sub-code?"},
+    // Основные ошибки
+    {static_cast<int>(ErrorType::OutOfRange), -1, "Index out of range"},
+    {static_cast<int>(ErrorType::InvalidArg), -1, "Invalid argument"},
+    {static_cast<int>(ErrorType::NegativeSize), -1, "Negative size specified"},
+    
+    // Ошибки Option
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::UnwrapOnNone), "Unwrap called on None Option"},
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::InvalidMapping), "Invalid type mapping in Option"},
+    
+    // Ошибки Sequence
+    {static_cast<int>(ErrorType::SequenceError), 0, "Sequence type mismatch"}, // TypeMismatch
+    {static_cast<int>(ErrorType::SequenceError), 1, "Invalid sequence operation"}, // InvalidOperation
+    
+    // UI ошибки
+    {static_cast<int>(ErrorType::InvalidArg), 0, "Menu input not an integer?"},
+    {static_cast<int>(ErrorType::InvalidArg), 1, "Array input was not integer?"},
+    {static_cast<int>(ErrorType::OutOfRange), 0, "Index < 0?"},
+    {static_cast<int>(ErrorType::OutOfRange), 1, "Index >= size?"},
+    {static_cast<int>(ErrorType::OutOfRange), 2, "start > end?"},
+    {static_cast<int>(ErrorType::OutOfRange), 3, "Empty?"},
+    {static_cast<int>(ErrorType::OutOfRange), 4, "Unknown sub-code?"},
+
+    // Ошибки монадических операций
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(InvalidMapping), 
+     "Invalid mapping in monadic operation"},
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(TupleBindError), 
+     "Tuple bind error"}
 };
 
-static std::string getErrorMessage(int code) {
+MyException::MyException(ErrorType t, int sc) : type(t), subCode(sc) {
+    for (const auto& err : g_ErrorTable) {
+        if (static_cast<int>(type) == err.code && 
+            (sc == -1 || sc == err.subCode)) {
+            message = err.message;
+            return;
+        }
+    }
+    message = "Unknown error";
+}
+
+std::string getErrorMessage(ErrorType type, int subCode) {
     for (auto &err : g_ErrorTable) {
-        if (err.code == code) {
+        if (static_cast<int>(type) == err.code && 
+            (subCode == -1 || subCode == err.subCode)) {
             return err.message;
         }
     }
-    return "[No known message for code]";
+    return "Unknown error";
 }
 
 void handleException(const MyException &ex) {
-    // Общий тип
-    switch (ex.getType()) {
-    case ErrorType::OutOfRange:
-        std::cout << "[OutOfRange] "; 
-        break;
-    case ErrorType::InvalidArg:
-        std::cout << "[InvalidArg] ";
-        break;
-    case ErrorType::NegativeSize:
-        std::cout << "[NegativeSize] ";
-        break;
-    default:
-        std::cout << "[Unknown type] ";
-        break;
-    }
-
-    std::cout << "code=" << (int)ex.getCode() << " => " 
-              << getErrorMessage(ex.getCode()) << "\n";
+    std::cout << "[Error] " << ex.what() 
+              << " (type=" << static_cast<int>(ex.getType())
+              << ", subCode=" << ex.getSubCode() << ")\n";
 }

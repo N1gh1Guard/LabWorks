@@ -1,5 +1,7 @@
 #pragma once
 #include <stdexcept>
+#include "MonadPair.h"
+#include "MonadTuple.h"
 
 template <class T>
 class Sequence {

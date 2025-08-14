@@ -1,32 +1,28 @@
 #pragma once
-#include <exception>
-#include <cstdint>
+#include <stdexcept>
+#include <string>
+#include "Error.h"  // Добавлено включение Error.h
 
 enum class ErrorType {
     OutOfRange,
     InvalidArg,
     NegativeSize,
-    Unknown
+    OptionError,
+    SequenceError
 };
 
 class MyException : public std::exception {
 private:
     ErrorType type;
-    uint8_t code;
-
+    int subCode;
+    std::string message;
+    
 public:
-    MyException(ErrorType t, uint8_t c)
-        : type(t), code(c) {}
-
-    ErrorType getType() const noexcept {
-        return type;
-    }
-
-    uint8_t getCode() const noexcept {
-        return code;
-    }
-
+    MyException(ErrorType t, int sc);
+    
+    ErrorType getType() const { return type; }
+    int getSubCode() const { return subCode; }
     const char* what() const noexcept override {
-        return "MyException (type+code)";
+        return message.c_str();
     }
 };
