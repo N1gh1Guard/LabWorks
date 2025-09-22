@@ -9,7 +9,6 @@ class ArraySequence : public Sequence<T> {
 private:
     DynamicArray<T>* items;
     int count;
-    //убрать
 public:
     ArraySequence() {
         items = new DynamicArray<T>(4);
@@ -37,7 +36,7 @@ public:
     }
 
     virtual T GetFirst() const override {
-        if (items->GetSize() == 0) {
+        if (count == 0) {
             throw MyException(ErrorType::OutOfRange, 2);
         }
         return items->Get(0);
@@ -151,11 +150,6 @@ public:
             items->Set(n - 1 - i, tmp);
         }
     }
-
-    void smartReverse() {
-        reverse();
-    }
-    //абсолютно ненужно
 
     virtual Sequence<T>* Clone() const override {
         return new ArraySequence<T>(*this);

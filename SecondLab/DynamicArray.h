@@ -47,14 +47,6 @@ public:
         return size;
     }
 
-    int Size() const {
-        return size;
-    }
-
-    int GetLength() const {
-        return GetSize();
-    }
-
 
     T Get(int index) const {
         if (index < 0) {
