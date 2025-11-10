@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+                // Add other library include paths here, e.g., "/usr/include/your_library"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++", // Or /usr/bin/clang++
+            "cStandard": "c17",
+            "cppStandard": "c++17", // Or c++14, c++20, etc.
+            "intelliSenseMode": "linux-gcc-x64" // Or "linux-clang-x64" if using clang
+        }
+    ],
+    "version": 4
+}
