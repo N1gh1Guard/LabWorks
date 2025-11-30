@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cassert>
-#include <vector>
 #include <string>
 
 #include "DynamicArray.h"
@@ -9,6 +8,7 @@
 #include "ListSequence.h"
 #include "ImmutableArraySequence.h"
 #include "ImmutableListSequence.h"
+#include "Functions.h"
 
 template<class Seq>
 void checkEqual(const Seq& seq, std::initializer_list<int> ref)
@@ -527,6 +527,83 @@ void TestImmutableListSequence() {
     std::cout << "All ImmutableListSequence tests passed!\n\n";
 }
 
+void TestMonadTuple2() {
+    std::cout << "Testing MonadTuple2...\n";
+    
+    MonadTuple2<int, double> tuple(42, 3.14);
+    assert(tuple.first == 42);
+    assert(tuple.second == 3.14);
+    
+    auto mapped = tuple.Map([](double x) { return x * 2; });
+    assert(mapped.first == 42);
+    assert(mapped.second == 6.28);
+    
+    std::cout << "MonadTuple2 tests passed!\n";
+}
+
+void TestMonadTuple3() {
+    std::cout << "Testing MonadTuple3...\n";
+    
+    MonadTuple3<int, double, char> tuple(1, 2.5, 'A');
+    assert(tuple.first == 1);
+    assert(tuple.second == 2.5);
+    assert(tuple.third == 'A');
+    
+    std::cout << "MonadTuple3 tests passed!\n";
+}
+
+void TestZipAsTuple() {
+    std::cout << "Testing zip_as_tuple...\n";
+    
+    ArraySequence<int> seq1;
+    ArraySequence<double> seq2;
+    
+    seq1.Append(1);
+    seq1.Append(2);
+    seq1.Append(3);
+    
+    seq2.Append(1.1);
+    seq2.Append(2.2);
+    seq2.Append(3.3);
+    
+    auto* zipped = zip_as_tuple(&seq1, &seq2);
+    assert(zipped->GetLength() == 3);
+    
+    auto tuple1 = zipped->Get(0);
+    assert(tuple1.first == 1);
+    assert(tuple1.second == 1.1);
+    
+    auto tuple2 = zipped->Get(1);
+    assert(tuple2.first == 2);
+    assert(tuple2.second == 2.2);
+    
+    delete zipped;
+    std::cout << "zip_as_tuple tests passed!\n";
+}
+
+void TestUnzipTuple() {
+    std::cout << "Testing unzip_tuple...\n";
+    
+    ArraySequence<MonadTuple2<int, double>> tuples;
+    tuples.Append(MonadTuple2<int, double>(1, 1.1));
+    tuples.Append(MonadTuple2<int, double>(2, 2.2));
+    tuples.Append(MonadTuple2<int, double>(3, 3.3));
+    
+    auto result = unzip_tuple(&tuples);
+    assert(result.first->GetLength() == 3);
+    assert(result.second->GetLength() == 3);
+    
+    assert(result.first->Get(0) == 1);
+    assert(result.second->Get(0) == 1.1);
+    
+    assert(result.first->Get(1) == 2);
+    assert(result.second->Get(1) == 2.2);
+    
+    delete result.first;
+    delete result.second;
+    std::cout << "unzip_tuple tests passed!\n";
+}
+
 int main() {
     std::cout<<"Running tests...\n";
 
@@ -542,6 +619,10 @@ int main() {
     TestImmutableArraySequence();
     TestImmutableListSequence();
 
+    TestMonadTuple2();
+    TestMonadTuple3();
+    TestZipAsTuple();
+    TestUnzipTuple();
     std::cout<<"All tests passed successfully!\n";
     return 0;
 }

@@ -50,29 +50,156 @@ public:
     Sequence<T>* get() const { return sequence; }
 };
 
-template <typename... Ts>
-class SequenceWrapper<MonadTuple<Ts...>> : public SequenceBase {
-    Sequence<MonadTuple<Ts...>>* sequence;
+template <typename T1, typename T2>
+class SequenceWrapper<MonadTuple2<T1, T2>> : public SequenceBase {
+    Sequence<MonadTuple2<T1, T2>>* sequence;
 public:
-    SequenceWrapper(Sequence<MonadTuple<Ts...>>* seq) : sequence(seq) {}
+    SequenceWrapper(Sequence<MonadTuple2<T1, T2>>* seq) : sequence(seq) {}
     ~SequenceWrapper() { delete sequence; }
 
     void Print() const override {
-        print(sequence);
+        cout << "[ ";
+        for (int i = 0; i < sequence->GetLength(); i++) {
+            if (i > 0) cout << ", ";
+            auto tuple = sequence->Get(i);
+            cout << "(" << tuple.first << ", " << tuple.second << ")";
+        }
+        cout << " ]\n";
     }
 
     const char* TypeName() const override {
-        return "MonadTupleSequence";
+        return "MonadTuple2Sequence";
     }
 
     int GetLength() const override {
         return sequence->GetLength();
     }
     
-    Sequence<MonadTuple<Ts...>>* get() const { 
+    Sequence<MonadTuple2<T1, T2>>* get() const { 
         return sequence; 
     }
 };
+
+template <typename T1, typename T2, typename T3>
+class SequenceWrapper<MonadTuple3<T1, T2, T3>> : public SequenceBase {
+    Sequence<MonadTuple3<T1, T2, T3>>* sequence;
+public:
+    SequenceWrapper(Sequence<MonadTuple3<T1, T2, T3>>* seq) : sequence(seq) {}
+    ~SequenceWrapper() { delete sequence; }
+
+    void Print() const override {
+        cout << "[ ";
+        for (int i = 0; i < sequence->GetLength(); i++) {
+            if (i > 0) cout << ", ";
+            auto tuple = sequence->Get(i);
+            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ")";
+        }
+        cout << " ]\n";
+    }
+
+    const char* TypeName() const override {
+        return "MonadTuple3Sequence";
+    }
+
+    int GetLength() const override {
+        return sequence->GetLength();
+    }
+    
+    Sequence<MonadTuple3<T1, T2, T3>>* get() const { 
+        return sequence; 
+    }
+};
+
+template <typename T1, typename T2, typename T3, typename T4>
+class SequenceWrapper<MonadTuple4<T1, T2, T3, T4>> : public SequenceBase {
+    Sequence<MonadTuple4<T1, T2, T3, T4>>* sequence;
+public:
+    SequenceWrapper(Sequence<MonadTuple4<T1, T2, T3, T4>>* seq) : sequence(seq) {}
+    ~SequenceWrapper() { delete sequence; }
+
+    void Print() const override {
+        cout << "[ ";
+        for (int i = 0; i < sequence->GetLength(); i++) {
+            if (i > 0) cout << ", ";
+            auto tuple = sequence->Get(i);
+            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ", " << tuple.fourth << ")";
+        }
+        cout << " ]\n";
+    }
+
+    const char* TypeName() const override {
+        return "MonadTuple4Sequence";
+    }
+
+    int GetLength() const override {
+        return sequence->GetLength();
+    }
+    
+    Sequence<MonadTuple4<T1, T2, T3, T4>>* get() const { 
+        return sequence; 
+    }
+};
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+class SequenceWrapper<MonadTuple5<T1, T2, T3, T4, T5>> : public SequenceBase {
+    Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* sequence;
+public:
+    SequenceWrapper(Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* seq) : sequence(seq) {}
+    ~SequenceWrapper() { delete sequence; }
+
+    void Print() const override {
+        cout << "[ ";
+        for (int i = 0; i < sequence->GetLength(); i++) {
+            if (i > 0) cout << ", ";
+            auto tuple = sequence->Get(i);
+            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ", " << tuple.fourth << ", " << tuple.fifth << ")";
+        }
+        cout << " ]\n";
+    }
+
+    const char* TypeName() const override {
+        return "MonadTuple5Sequence";
+    }
+
+    int GetLength() const override {
+        return sequence->GetLength();
+    }
+    
+    Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* get() const { 
+        return sequence; 
+    }
+};
+
+template <typename T1, typename T2>
+class SequenceWrapper<MonadPair<T1, T2>> : public SequenceBase {
+    Sequence<MonadPair<T1, T2>>* sequence;
+public:
+    SequenceWrapper(Sequence<MonadPair<T1, T2>>* seq) : sequence(seq) {}
+    ~SequenceWrapper() { delete sequence; }
+
+    void Print() const override {
+        cout << "[ ";
+        for (int i = 0; i < sequence->GetLength(); i++) {
+            if (i > 0) cout << ", ";
+            auto pair = sequence->Get(i);
+            cout << "(" << pair.first << ", " << pair.second << ")";
+        }
+        cout << " ]\n";
+    }
+
+    const char* TypeName() const override {
+        return "MonadPairSequence";
+    }
+
+    int GetLength() const override {
+        return sequence->GetLength();
+    }
+    
+    Sequence<MonadPair<T1, T2>>* get() const { 
+        return sequence; 
+    }
+};
+
 
 Option<int> readInt(const string& prompt) {
     cout << prompt;
@@ -425,8 +552,8 @@ static void handleZipAsTuple(vector<shared_ptr<SequenceBase>>& seqs) {
         return;
     }
     
-    auto countOption = readInt("Enter number of sequences to zip (min 2): ");
-    if (countOption.IsNone() || countOption.Unwrap() < 2) {
+    auto countOption = readInt("Enter number of sequences to zip (min 2, max 5): ");
+    if (countOption.IsNone() || countOption.Unwrap() < 2 || countOption.Unwrap() > 5) {
         cout << "[Error] Invalid number\n";
         return;
     }
@@ -455,33 +582,31 @@ static void handleZipAsTuple(vector<shared_ptr<SequenceBase>>& seqs) {
         sequences.push_back(wrapper->get());
     }
     
-    // Создаем кортежную последовательность
     shared_ptr<SequenceBase> result;
     
-    // Обработка разного количества последовательностей
     switch (count) {
         case 2: {
             auto* zipped = zip_as_tuple(sequences[0], sequences[1]);
-            result = make_shared<SequenceWrapper<MonadTuple<int, int>>>(zipped);
+            result = make_shared<SequenceWrapper<MonadTuple2<int, int>>>(zipped);
             break;
         }
         case 3: {
             auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2]);
-            result = make_shared<SequenceWrapper<MonadTuple<int, int, int>>>(zipped);
+            result = make_shared<SequenceWrapper<MonadTuple3<int, int, int>>>(zipped);
             break;
         }
         case 4: {
             auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2], sequences[3]);
-            result = make_shared<SequenceWrapper<MonadTuple<int, int, int, int>>>(zipped);
+            result = make_shared<SequenceWrapper<MonadTuple4<int, int, int, int>>>(zipped);
             break;
         }
         case 5: {
             auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2], sequences[3], sequences[4]);
-            result = make_shared<SequenceWrapper<MonadTuple<int, int, int, int, int>>>(zipped);
+            result = make_shared<SequenceWrapper<MonadTuple5<int, int, int, int, int>>>(zipped);
             break;
         }
         default:
-            cout << "[Error] Maximum 5 sequences supported\n";
+            cout << "[Error] Unsupported number of sequences\n";
             return;
     }
     
@@ -499,38 +624,37 @@ static void handleUnzipTuple(vector<shared_ptr<SequenceBase>>& seqs) {
         return;
     }
 
-    // Определение размера кортежа
-    if (auto wrapper2 = dynamic_cast<SequenceWrapper<MonadTuple<int, int>>*>(seqs[id].get())) {
+    if (auto wrapper2 = dynamic_cast<SequenceWrapper<MonadTuple2<int, int>>*>(seqs[id].get())) {
         auto res = unzip_tuple(wrapper2->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<0>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<1>(res)));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
         cout << "[OK] Unzipped to IDs " << (seqs.size() - 2)
              << " and " << (seqs.size() - 1) << "\n";
     }
-    else if (auto wrapper3 = dynamic_cast<SequenceWrapper<MonadTuple<int, int, int>>*>(seqs[id].get())) {
+    else if (auto wrapper3 = dynamic_cast<SequenceWrapper<MonadTuple3<int, int, int>>*>(seqs[id].get())) {
         auto res = unzip_tuple(wrapper3->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<0>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<1>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<2>(res)));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
         cout << "[OK] Unzipped to IDs " << (seqs.size() - 3)
              << ", " << (seqs.size() - 2) << " and " << (seqs.size() - 1) << "\n";
     }
-    else if (auto wrapper4 = dynamic_cast<SequenceWrapper<MonadTuple<int, int, int, int>>*>(seqs[id].get())) {
+    else if (auto wrapper4 = dynamic_cast<SequenceWrapper<MonadTuple4<int, int, int, int>>*>(seqs[id].get())) {
         auto res = unzip_tuple(wrapper4->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<0>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<1>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<2>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<3>(res)));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fourth));
         cout << "[OK] Unzipped to IDs " << (seqs.size() - 4) << ", " << (seqs.size() - 3)
              << ", " << (seqs.size() - 2) << " and " << (seqs.size() - 1) << "\n";
     }
-    else if (auto wrapper5 = dynamic_cast<SequenceWrapper<MonadTuple<int, int, int, int, int>>*>(seqs[id].get())) {
+    else if (auto wrapper5 = dynamic_cast<SequenceWrapper<MonadTuple5<int, int, int, int, int>>*>(seqs[id].get())) {
         auto res = unzip_tuple(wrapper5->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<0>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<1>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<2>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<3>(res)));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(std::get<4>(res)));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fourth));
+        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fifth));
         cout << "[OK] Unzipped to IDs " << (seqs.size() - 5) << ", " << (seqs.size() - 4)
              << ", " << (seqs.size() - 3) << ", " << (seqs.size() - 2) 
              << " and " << (seqs.size() - 1) << "\n";
