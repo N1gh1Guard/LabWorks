@@ -2,16 +2,32 @@
 #include "DynamicArray.h"
 #include "Sequence.h"
 #include <stdexcept>
-#include "Exeption.h"
+#include "Exception.h"
 
 template <class T>
 class ArraySequence : public Sequence<T> {
 private:
     DynamicArray<T>* items;
     int count;
+    int capacity;
+
+    void resizeIfNeeded() {
+        if (count >= capacity) {
+            int newCapacity = (capacity == 0) ? 4 : capacity * 2;
+            DynamicArray<T>* newItems = new DynamicArray<T>(newCapacity);
+            for (int i = 0; i < count; i++) {
+                newItems->Set(i, items->Get(i));
+            }
+            delete items;
+            items = newItems;
+            capacity = newCapacity;
+        }
+    }
+
 public:
     ArraySequence() {
-        items = new DynamicArray<T>(4);
+        capacity = 4;
+        items = new DynamicArray<T>(capacity);
         count = 0;
     }
 
@@ -19,7 +35,8 @@ public:
         if (length < 0) {
             throw MyException(ErrorType::NegativeSize, 0);
         }
-        items = new DynamicArray<T>(length);
+        capacity = (length == 0) ? 4 : length * 2;
+        items = new DynamicArray<T>(capacity);
         for (int i = 0; i < length; i++) {
             items->Set(i, arr[i]);
         }
@@ -27,6 +44,7 @@ public:
     }
 
     ArraySequence(const ArraySequence<T>& other) {
+        capacity = other.capacity;
         count = other.count;
         items = new DynamicArray<T>(*other.items);
     }
@@ -81,9 +99,7 @@ public:
     }
 
     virtual Sequence<T>* Append(const T& item) override {
-        if (count == items->Size()) {
-            items->Resize(items->Size() * 2);
-        }
+        resizeIfNeeded();
         items->Set(count, item);
         count++;
         return this;
@@ -105,9 +121,7 @@ public:
     }
 
     virtual Sequence<T>* Prepend(const T& item) override {
-        if (count == items->Size()) {
-            items->Resize(items->Size() * 2);
-        }
+        resizeIfNeeded();
         for (int i = count; i > 0; i--) {
             items->Set(i, items->Get(i - 1));
         }
@@ -120,12 +134,11 @@ public:
         if (index < 0) {
             throw MyException(ErrorType::OutOfRange, 0);
         }
-        if (index >= count) {
+        if (index > count) {
             throw MyException(ErrorType::OutOfRange, 1);
         }
-        if (count == items->Size()) {
-            items->Resize(items->Size() * 2);
-        }
+        
+        resizeIfNeeded();
         for (int i = count; i > index; i--) {
             items->Set(i, items->Get(i - 1));
         }
@@ -153,5 +166,27 @@ public:
 
     virtual Sequence<T>* Clone() const override {
         return new ArraySequence<T>(*this);
+    }
+
+    ArraySequence<T>& operator=(const ArraySequence<T>& other) {
+        if (this != &other) {
+            delete items;
+            capacity = other.capacity;
+            count = other.count;
+            items = new DynamicArray<T>(*other.items);
+        }
+        return *this;
+    }
+
+    bool operator==(const ArraySequence<T>& other) const {
+        if (count != other.count) return false;
+        for (int i = 0; i < count; i++) {
+            if (items->Get(i) != other.items->Get(i)) return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const ArraySequence<T>& other) const {
+        return !(*this == other);
     }
 };

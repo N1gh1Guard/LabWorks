@@ -1,5 +1,5 @@
 #include "Error.h"
-#include "Exeption.h"
+#include "Exception.h"
 #include <iostream>
 
 std::vector<ErrorInfo> g_ErrorTable = {

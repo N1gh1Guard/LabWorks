@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <initializer_list>
 #include <unordered_set>
-#include "Exeption.h"
+#include "Exception.h"
 
 template <class T>
 class LinkedList {

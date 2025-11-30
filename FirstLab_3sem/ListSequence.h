@@ -1,11 +1,13 @@
 #pragma once
 #include "Sequence.h"
 #include "LinkedList.h"
+#include "Exception.h"
 
 template <class T>
 class ListSequence : public Sequence<T> {
 protected:
     LinkedList<T>* list;
+
 public:
     ListSequence() {
         list = new LinkedList<T>();
@@ -21,6 +23,13 @@ public:
 
     ListSequence(const ListSequence<T>& other) {
         list = new LinkedList<T>(*other.list);
+    }
+
+    ListSequence(const Sequence<T>& other) {
+        list = new LinkedList<T>();
+        for (int i = 0; i < other.GetLength(); i++) {
+            list->Append(other.Get(i));
+        }
     }
 
     ~ListSequence() override {
@@ -103,5 +112,25 @@ public:
 
     virtual Sequence<T>* Clone() const override {
         return new ListSequence<T>(*this);
+    }
+
+    ListSequence<T>& operator=(const ListSequence<T>& other) {
+        if (this != &other) {
+            delete list;
+            list = new LinkedList<T>(*other.list);
+        }
+        return *this;
+    }
+
+    bool operator==(const ListSequence<T>& other) const {
+        if (GetLength() != other.GetLength()) return false;
+        for (int i = 0; i < GetLength(); i++) {
+            if (Get(i) != other.Get(i)) return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const ListSequence<T>& other) const {
+        return !(*this == other);
     }
 };

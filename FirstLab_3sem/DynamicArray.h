@@ -1,6 +1,6 @@
 #pragma once
 #include <stdexcept>
-#include "Exeption.h"
+#include "Exception.h"
 
 template <class T>
 class DynamicArray {
@@ -47,13 +47,12 @@ public:
         return size;
     }
 
-
     T Get(int index) const {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0); // code=0 => "index < 0?"
+            throw MyException(ErrorType::OutOfRange, 0);
         }
         if (index >= size) {
-            throw MyException(ErrorType::OutOfRange, 1); // code=1 => "index >= size"
+            throw MyException(ErrorType::OutOfRange, 1);
         }
         return data[index];
     }
@@ -70,7 +69,7 @@ public:
 
     void Resize(int newSize) {
         if (newSize < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(ErrorType::NegativeSize, 0);
         }
         T* newData = new T[newSize];
         int minSize = (newSize < size) ? newSize : size;
@@ -106,6 +105,7 @@ public:
         }
         return data[index];
     }
+
     const T& operator[](int index) const {
         if (index < 0) {
             throw MyException(ErrorType::OutOfRange, 0);

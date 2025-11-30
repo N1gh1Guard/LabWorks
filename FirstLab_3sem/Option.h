@@ -1,5 +1,5 @@
 #pragma once
-#include "Exeption.h"
+#include "Exception.h"
 #include "Error.h"
 
 template <typename T>

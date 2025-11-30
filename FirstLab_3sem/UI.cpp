@@ -12,7 +12,7 @@
 #include "ImmutableArraySequence.h"
 #include "ImmutableListSequence.h"
 
-#include "Exeption.h"
+#include "Exception.h"
 #include "Error.h"
 #include "Functions.h"
 #include "Option.h"

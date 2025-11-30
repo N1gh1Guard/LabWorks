@@ -21,7 +21,8 @@ public:
     virtual const char* TypeName() const = 0;
 
     virtual Sequence<T>* Clone() const = 0;
-    virtual ~Sequence() {}
+    
+    virtual ~Sequence() = default;
 };
 
 template<class T>
