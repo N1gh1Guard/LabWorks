@@ -8,6 +8,13 @@ class ImmutableListSequence : public Sequence<T> {
 private:
     LinkedList<T>* list;
 
+    ImmutableListSequence(const Sequence<T>& other) {
+        list = new LinkedList<T>();
+        for (int i = 0; i < other.GetLength(); i++) {
+            list->Append(other.Get(i));
+        }
+    }
+    
     void copyFrom(const LinkedList<T>& source) {
         list = new LinkedList<T>(source);
     }

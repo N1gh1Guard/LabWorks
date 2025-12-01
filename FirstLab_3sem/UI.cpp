@@ -322,16 +322,16 @@ static void handleCreate(vector<shared_ptr<SequenceBase>>& seqs) {
             return;
         }
         int n = nOption.Unwrap();
-        vector<int> arr(n);
+        ArraySequence<int> tempSeq;
         for (int i = 0; i < n; i++) {
             auto elemOption = readInt("arr[" + to_string(i) + "] = ");
             if (elemOption.IsNone()) {
                 cout << "[Error] Invalid element\n";
                 return;
             }
-            arr[i] = elemOption.Unwrap();
+            tempSeq.Append(elemOption.Unwrap());
         }
-        auto seq = new ImmutableArraySequence<int>(arr.data(), n);
+        auto seq = new ImmutableArraySequence<int>(tempSeq);
         seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
         cout << "[OK] Created ImmutableArraySequence, ID=" << (seqs.size() - 1) << "\n";
         break;
@@ -343,16 +343,16 @@ static void handleCreate(vector<shared_ptr<SequenceBase>>& seqs) {
             return;
         }
         int n = nOption.Unwrap();
-        vector<int> arr(n);
+        ArraySequence<int> tempSeq;
         for (int i = 0; i < n; i++) {
             auto elemOption = readInt("arr[" + to_string(i) + "] = ");
             if (elemOption.IsNone()) {
                 cout << "[Error] Invalid element\n";
                 return;
             }
-            arr[i] = elemOption.Unwrap();
+            tempSeq.Append(elemOption.Unwrap());
         }
-        auto seq = new ImmutableListSequence<int>(arr.data(), n);
+        auto seq = new ImmutableListSequence<int>(tempSeq);
         seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
         cout << "[OK] Created ImmutableListSequence, ID=" << (seqs.size() - 1) << "\n";
         break;
@@ -384,25 +384,20 @@ static void handleAppend(vector<shared_ptr<SequenceBase>>& seqs) {
         return;
     }
 
-    wrapper->get()->Append(valOption.Unwrap());
-    cout << "[OK] Appended " << valOption.Unwrap() << " to seq #" << id << "\n";
-}
-
-static void handlePrintAll(const vector<shared_ptr<SequenceBase>>& seqs) {
-    if (seqs.empty()) {
-        cout << "[Info] No sequences to display\n";
-        return;
-    }
+    Sequence<int>* oldSeq = wrapper->get();
+    Sequence<int>* newSeq = oldSeq->Append(valOption.Unwrap());
     
-    for (size_t i = 0; i < seqs.size(); i++) {
-        cout << "Seq #" << i << " (" << seqs[i]->TypeName() 
-             << ", len=" << seqs[i]->GetLength() << "): ";
-        seqs[i]->Print();
+    if (newSeq != oldSeq) {
+        auto newWrapper = new SequenceWrapper<int>(newSeq);
+        seqs[id].reset(newWrapper);
+        cout << "[OK] Appended " << valOption.Unwrap() << " to seq #" << id << " (new immutable sequence)\n";
+    } else {
+        cout << "[OK] Appended " << valOption.Unwrap() << " to seq #" << id << " (mutable sequence)\n";
     }
 }
 
-static void handleRemoveSequence(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter sequence ID to remove: ");
+static void handleRemoveSequance(vector<shared_ptr<SequenceBase>>& seqs) {
+    auto idOption = chooseSequence(seqs, "Enter sequence ID: ");
     if (idOption.IsNone()) return;
     
     int id = idOption.Unwrap();
@@ -411,8 +406,30 @@ static void handleRemoveSequence(vector<shared_ptr<SequenceBase>>& seqs) {
         return;
     }
 
-    seqs.erase(seqs.begin() + id);
-    cout << "[OK] Removed sequence #" << id << "\n";
+    auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        cout << "[Error] Sequence must contain integers\n";
+        return;
+    }
+
+    auto idxOption = readInt("Enter index to remove: ");
+    if (idxOption.IsNone()) {
+        cout << "[Error] Invalid index\n";
+        return;
+    }
+
+    Sequence<int>* oldSeq = wrapper->get();
+    Sequence<int>* newSeq = oldSeq->RemoveAt(idxOption.Unwrap());
+    
+    if (newSeq != oldSeq) {
+        auto newWrapper = new SequenceWrapper<int>(newSeq);
+        seqs[id].reset(newWrapper);
+        cout << "[OK] Removed item at index " << idxOption.Unwrap() 
+             << " from seq #" << id << " (new immutable sequence)\n";
+    } else {
+        cout << "[OK] Removed item at index " << idxOption.Unwrap() 
+             << " from seq #" << id << " (mutable sequence)\n";
+    }
 }
 
 static void handleSubsequence(vector<shared_ptr<SequenceBase>>& seqs) {

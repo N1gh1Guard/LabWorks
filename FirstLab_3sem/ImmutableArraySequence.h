@@ -9,6 +9,18 @@ private:
     T* data;
     int count;
 
+    ImmutableArraySequence(const Sequence<T>& other) {
+        count = other.GetLength();
+        if (count > 0) {
+            data = new T[count];
+            for (int i = 0; i < count; i++) {
+                data[i] = other.Get(i);
+            }
+        } else {
+            data = nullptr;
+        }
+    }
+
     void copyFrom(const T* source, int sourceCount) {
         if (sourceCount < 0) {
             throw MyException(ErrorType::NegativeSize, 0);
