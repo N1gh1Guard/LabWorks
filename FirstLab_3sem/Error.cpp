@@ -3,32 +3,29 @@
 #include <iostream>
 
 std::vector<ErrorInfo> g_ErrorTable = {
-    // Основные ошибки
     {static_cast<int>(ErrorType::OutOfRange), -1, "Index out of range"},
     {static_cast<int>(ErrorType::InvalidArg), -1, "Invalid argument"},
     {static_cast<int>(ErrorType::NegativeSize), -1, "Negative size specified"},
     
-    // Ошибки Option
     {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::UnwrapOnNone), "Unwrap called on None Option"},
     {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::InvalidMapping), "Invalid type mapping in Option"},
     
-    // Ошибки Sequence
-    {static_cast<int>(ErrorType::SequenceError), 0, "Sequence type mismatch"}, // TypeMismatch
-    {static_cast<int>(ErrorType::SequenceError), 1, "Invalid sequence operation"}, // InvalidOperation
+    {static_cast<int>(ErrorType::SequenceError), 0, "Sequence type mismatch"},
+    {static_cast<int>(ErrorType::SequenceError), 1, "Invalid sequence operation"},
     
-    // UI ошибки
-    {static_cast<int>(ErrorType::InvalidArg), 0, "Menu input not an integer?"},
-    {static_cast<int>(ErrorType::InvalidArg), 1, "Array input was not integer?"},
+    {static_cast<int>(ErrorType::InvalidArg), static_cast<int>(InvalidArgCode::MenuInputNotInteger), "Menu input not an integer?"},
+    {static_cast<int>(ErrorType::InvalidArg), static_cast<int>(InvalidArgCode::ArrayInputNotInteger), "Array input was not integer?"},
+    {static_cast<int>(ErrorType::InvalidArg), static_cast<int>(InvalidArgCode::NullPointer), "Null pointer passed to function"},
+
     {static_cast<int>(ErrorType::OutOfRange), 0, "Index < 0?"},
     {static_cast<int>(ErrorType::OutOfRange), 1, "Index >= size?"},
     {static_cast<int>(ErrorType::OutOfRange), 2, "start > end?"},
     {static_cast<int>(ErrorType::OutOfRange), 3, "Empty?"},
     {static_cast<int>(ErrorType::OutOfRange), 4, "Unknown sub-code?"},
 
-    // Ошибки монадических операций
-    {static_cast<int>(ErrorType::OptionError), static_cast<int>(InvalidMapping), 
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::InvalidMapping), 
      "Invalid mapping in monadic operation"},
-    {static_cast<int>(ErrorType::OptionError), static_cast<int>(TupleBindError), 
+    {static_cast<int>(ErrorType::OptionError), static_cast<int>(OptionErrorCode::TupleBindError), 
      "Tuple bind error"}
 };
 

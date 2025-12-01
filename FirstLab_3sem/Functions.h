@@ -6,6 +6,7 @@
 #include "MonadPair.h"
 #include "MonadTuple.h"
 #include "BasicStructures.h"
+#include "Exception.h"
 
 template <typename T>
 int min_value(int a, int b) {
@@ -14,6 +15,10 @@ int min_value(int a, int b) {
 
 template <class T>
 void print(const Sequence<T>* seq) {
+    if (!seq) {
+        std::cout << "[nullptr]\n";
+        return;
+    }
     std::cout << "[ ";
     for (int i = 0; i < seq->GetLength(); i++) {
         if (i > 0) std::cout << ", ";
@@ -24,6 +29,9 @@ void print(const Sequence<T>* seq) {
 
 template <typename T1, typename T2>
 Sequence<MonadPair<T1, T2>>* zip(const Sequence<T1>* s1, const Sequence<T2>* s2) {
+    if (!s1 || !s2) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     int minLen = min_value<T1>(s1->GetLength(), s2->GetLength());
     auto* result = new ArraySequence<MonadPair<T1, T2>>();
     for (int i = 0; i < minLen; i++) {
@@ -34,6 +42,9 @@ Sequence<MonadPair<T1, T2>>* zip(const Sequence<T1>* s1, const Sequence<T2>* s2)
 
 template <typename T1, typename T2>
 Pair<Sequence<T1>*, Sequence<T2>*> unzip(const Sequence<MonadPair<T1, T2>>* seq) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     auto* seq1 = new ArraySequence<T1>();
     auto* seq2 = new ArraySequence<T2>();
     for (int i = 0; i < seq->GetLength(); i++) {
@@ -46,6 +57,9 @@ Pair<Sequence<T1>*, Sequence<T2>*> unzip(const Sequence<MonadPair<T1, T2>>* seq)
 
 template <typename T1, typename T2>
 Sequence<MonadTuple2<T1, T2>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* s2) {
+    if (!s1 || !s2) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     int minLen = min_value<T1>(s1->GetLength(), s2->GetLength());
     auto* result = new ArraySequence<MonadTuple2<T1, T2>>();
     for (int i = 0; i < minLen; i++) {
@@ -56,6 +70,9 @@ Sequence<MonadTuple2<T1, T2>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* s2) 
 
 template <typename T1, typename T2, typename T3>
 Sequence<MonadTuple3<T1, T2, T3>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* s2, Sequence<T3>* s3) {
+    if (!s1 || !s2 || !s3) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     int len1 = s1->GetLength();
     int len2 = s2->GetLength();
     int len3 = s3->GetLength();
@@ -70,6 +87,9 @@ Sequence<MonadTuple3<T1, T2, T3>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* 
 
 template <typename T1, typename T2, typename T3, typename T4>
 Sequence<MonadTuple4<T1, T2, T3, T4>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* s2, Sequence<T3>* s3, Sequence<T4>* s4) {
+    if (!s1 || !s2 || !s3 || !s4) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     int len1 = s1->GetLength();
     int len2 = s2->GetLength();
     int len3 = s3->GetLength();
@@ -85,6 +105,9 @@ Sequence<MonadTuple4<T1, T2, T3, T4>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
 Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* zip_as_tuple(Sequence<T1>* s1, Sequence<T2>* s2, Sequence<T3>* s3, Sequence<T4>* s4, Sequence<T5>* s5) {
+    if (!s1 || !s2 || !s3 || !s4 || !s5) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     int len1 = s1->GetLength();
     int len2 = s2->GetLength();
     int len3 = s3->GetLength();
@@ -101,6 +124,9 @@ Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* zip_as_tuple(Sequence<T1>* s1, Sequen
 
 template <typename T1, typename T2>
 Pair<Sequence<T1>*, Sequence<T2>*> unzip_tuple(const Sequence<MonadTuple2<T1, T2>>* seq) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     auto* seq1 = new ArraySequence<T1>();
     auto* seq2 = new ArraySequence<T2>();
     for (int i = 0; i < seq->GetLength(); i++) {
@@ -113,6 +139,9 @@ Pair<Sequence<T1>*, Sequence<T2>*> unzip_tuple(const Sequence<MonadTuple2<T1, T2
 
 template <typename T1, typename T2, typename T3>
 Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip_tuple(const Sequence<MonadTuple3<T1, T2, T3>>* seq) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     auto* seq1 = new ArraySequence<T1>();
     auto* seq2 = new ArraySequence<T2>();
     auto* seq3 = new ArraySequence<T3>();
@@ -127,6 +156,9 @@ Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip_tuple(const Sequence<M
 
 template <typename T1, typename T2, typename T3, typename T4>
 Quadruple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*, Sequence<T4>*> unzip_tuple(const Sequence<MonadTuple4<T1, T2, T3, T4>>* seq) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     auto* seq1 = new ArraySequence<T1>();
     auto* seq2 = new ArraySequence<T2>();
     auto* seq3 = new ArraySequence<T3>();
@@ -143,6 +175,9 @@ Quadruple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*, Sequence<T4>*> unzip_tupl
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
 Quintuple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*, Sequence<T4>*, Sequence<T5>*> unzip_tuple(const Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* seq) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     auto* seq1 = new ArraySequence<T1>();
     auto* seq2 = new ArraySequence<T2>();
     auto* seq3 = new ArraySequence<T3>();
@@ -161,6 +196,9 @@ Quintuple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*, Sequence<T4>*, Sequence<T
 
 template <class T, class R>
 Sequence<R>* map(const Sequence<T>* seq, R (*f)(const T&)) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     Sequence<R>* result = new ArraySequence<R>();
     for (int i = 0; i < seq->GetLength(); i++) {
         R val = f(seq->Get(i));
@@ -171,6 +209,9 @@ Sequence<R>* map(const Sequence<T>* seq, R (*f)(const T&)) {
 
 template <class T>
 Sequence<T>* where(const Sequence<T>* seq, bool (*predicate)(const T&)) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     Sequence<T>* result = new ArraySequence<T>();
     for (int i = 0; i < seq->GetLength(); i++) {
         T elem = seq->Get(i);
@@ -183,6 +224,9 @@ Sequence<T>* where(const Sequence<T>* seq, bool (*predicate)(const T&)) {
 
 template <class T>
 T reduce(const Sequence<T>* seq, T (*f)(const T&, const T&), T startVal) {
+    if (!seq) {
+        throw MyException(ErrorType::InvalidArg, static_cast<int>(InvalidArgCode::NullPointer));
+    }
     T accum = startVal;
     for (int i = 0; i < seq->GetLength(); i++) {
         accum = f(seq->Get(i), accum);

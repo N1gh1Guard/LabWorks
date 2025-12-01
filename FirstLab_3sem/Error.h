@@ -10,9 +10,15 @@ enum OptionErrorCode {
     TupleBindError = 2
 };
 
+enum InvalidArgCode {
+    NullPointer = 2,
+    MenuInputNotInteger = 0,
+    ArrayInputNotInteger = 1
+};
+
 struct ErrorInfo {
-    int code;          // Основной код ошибки (ErrorType)
-    int subCode;       // Дополнительный код ошибки
+    int code;
+    int subCode;
     std::string message;
 };
 
