@@ -9,29 +9,15 @@ private:
     T* data;
     int count;
 
-    ImmutableArraySequence(const Sequence<T>& other) {
-        count = other.GetLength();
-        if (count > 0) {
-            data = new T[count];
-            for (int i = 0; i < count; i++) {
-                data[i] = other.Get(i);
-            }
-        } else {
-            data = nullptr;
-        }
-    }
-
     void copyFrom(const T* source, int sourceCount) {
         if (sourceCount < 0) {
-            throw MyException(ErrorType::NegativeSize, 0);
+            throw MyException(1, "Negative size specified");
         }
-        
         this->count = sourceCount;
         if (sourceCount == 0) {
             this->data = nullptr;
             return;
         }
-        
         this->data = new T[sourceCount];
         for (int i = 0; i < sourceCount; i++) {
             this->data[i] = source[i];
@@ -83,24 +69,24 @@ public:
 
     virtual T GetFirst() const override {
         if (count == 0) {
-            throw MyException(ErrorType::OutOfRange, 3);
+            throw MyException(3, "Sequence is empty");
         }
         return data[0];
     }
 
     virtual T GetLast() const override {
         if (count == 0) {
-            throw MyException(ErrorType::OutOfRange, 3);
+            throw MyException(3, "Sequence is empty");
         }
         return data[count - 1];
     }
 
     virtual T Get(int index) const override {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         return data[index];
     }
@@ -111,22 +97,19 @@ public:
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const override {
         if (startIndex < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (endIndex < 0 || startIndex > endIndex) {
-            throw MyException(ErrorType::OutOfRange, 2);
+            throw MyException(2, "Index out of range");
         }
         if (endIndex >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
-        
         int newLength = endIndex - startIndex + 1;
         T* subData = new T[newLength];
-        
         for (int i = 0; i < newLength; i++) {
             subData[i] = data[startIndex + i];
         }
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(subData, newLength);
         delete[] subData;
         return result;
@@ -134,13 +117,10 @@ public:
 
     virtual Sequence<T>* Append(const T& item) override {
         T* newData = new T[count + 1];
-        
         for (int i = 0; i < count; i++) {
             newData[i] = data[i];
         }
-        
         newData[count] = item;
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(newData, count + 1);
         delete[] newData;
         return result;
@@ -148,13 +128,10 @@ public:
 
     virtual Sequence<T>* Prepend(const T& item) override {
         T* newData = new T[count + 1];
-        
         newData[0] = item;
-        
         for (int i = 0; i < count; i++) {
             newData[i + 1] = data[i];
         }
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(newData, count + 1);
         delete[] newData;
         return result;
@@ -162,24 +139,19 @@ public:
 
     virtual Sequence<T>* InsertAt(const T& item, int index) override {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index > count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
-        
         T* newData = new T[count + 1];
-        
         for (int i = 0; i < index; i++) {
             newData[i] = data[i];
         }
-        
         newData[index] = item;
-        
         for (int i = index; i < count; i++) {
             newData[i + 1] = data[i];
         }
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(newData, count + 1);
         delete[] newData;
         return result;
@@ -188,17 +160,13 @@ public:
     virtual Sequence<T>* Concat(const Sequence<T>* other) const override {
         int otherLength = other->GetLength();
         int newLength = count + otherLength;
-        
         T* newData = new T[newLength];
-        
         for (int i = 0; i < count; i++) {
             newData[i] = data[i];
         }
-        
         for (int i = 0; i < otherLength; i++) {
             newData[count + i] = other->Get(i);
         }
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(newData, newLength);
         delete[] newData;
         return result;
@@ -206,25 +174,21 @@ public:
 
     virtual Sequence<T>* RemoveAt(int index) override {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         if (count == 0) {
-            throw MyException(ErrorType::OutOfRange, 3);
+            throw MyException(3, "Sequence is empty");
         }
-        
         T* newData = new T[count - 1];
-        
         for (int i = 0; i < index; i++) {
             newData[i] = data[i];
         }
-        
         for (int i = index + 1; i < count; i++) {
             newData[i - 1] = data[i];
         }
-        
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(newData, count - 1);
         delete[] newData;
         return result;

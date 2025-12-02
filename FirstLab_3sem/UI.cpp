@@ -2,38 +2,34 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-#include <functional>
 #include <sstream>
-#include <utility>
 
 #include "Sequence.h"
 #include "ArraySequence.h"
 #include "ListSequence.h"
 #include "ImmutableArraySequence.h"
 #include "ImmutableListSequence.h"
-
-#include "Exception.h"
-#include "Error.h"
 #include "Functions.h"
-#include "Option.h"
-#include "MonadTuple.h"
+#include "Pair.h"
+#include "Exception.h"
 
 using namespace std;
 
-class SequenceBase {
+class SequenceWrapper {
 public:
+    virtual ~SequenceWrapper() = default;
     virtual void Print() const = 0;
     virtual const char* TypeName() const = 0;
     virtual int GetLength() const = 0;
-    virtual ~SequenceBase() = default;
+    virtual Sequence<int>* GetIntSequence() = 0;
 };
 
 template <typename T>
-class SequenceWrapper : public SequenceBase {
+class TypedSequenceWrapper : public SequenceWrapper {
     Sequence<T>* sequence;
 public:
-    SequenceWrapper(Sequence<T>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
+    TypedSequenceWrapper(Sequence<T>* seq) : sequence(seq) {}
+    ~TypedSequenceWrapper() { delete sequence; }
 
     void Print() const override {
         print(sequence);
@@ -47,135 +43,41 @@ public:
         return sequence->GetLength();
     }
 
-    Sequence<T>* get() const { return sequence; }
+    Sequence<int>* GetIntSequence() override {
+        return nullptr;
+    }
 };
 
-template <typename T1, typename T2>
-class SequenceWrapper<MonadTuple2<T1, T2>> : public SequenceBase {
-    Sequence<MonadTuple2<T1, T2>>* sequence;
+template <>
+class TypedSequenceWrapper<int> : public SequenceWrapper {
+    Sequence<int>* sequence;
 public:
-    SequenceWrapper(Sequence<MonadTuple2<T1, T2>>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
+    TypedSequenceWrapper(Sequence<int>* seq) : sequence(seq) {}
+    ~TypedSequenceWrapper() { delete sequence; }
 
     void Print() const override {
-        cout << "[ ";
-        for (int i = 0; i < sequence->GetLength(); i++) {
-            if (i > 0) cout << ", ";
-            auto tuple = sequence->Get(i);
-            cout << "(" << tuple.first << ", " << tuple.second << ")";
-        }
-        cout << " ]\n";
+        print(sequence);
     }
 
     const char* TypeName() const override {
-        return "MonadTuple2Sequence";
+        return sequence->TypeName();
     }
 
     int GetLength() const override {
         return sequence->GetLength();
     }
-    
-    Sequence<MonadTuple2<T1, T2>>* get() const { 
-        return sequence; 
-    }
-};
 
-template <typename T1, typename T2, typename T3>
-class SequenceWrapper<MonadTuple3<T1, T2, T3>> : public SequenceBase {
-    Sequence<MonadTuple3<T1, T2, T3>>* sequence;
-public:
-    SequenceWrapper(Sequence<MonadTuple3<T1, T2, T3>>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
-
-    void Print() const override {
-        cout << "[ ";
-        for (int i = 0; i < sequence->GetLength(); i++) {
-            if (i > 0) cout << ", ";
-            auto tuple = sequence->Get(i);
-            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ")";
-        }
-        cout << " ]\n";
-    }
-
-    const char* TypeName() const override {
-        return "MonadTuple3Sequence";
-    }
-
-    int GetLength() const override {
-        return sequence->GetLength();
-    }
-    
-    Sequence<MonadTuple3<T1, T2, T3>>* get() const { 
-        return sequence; 
-    }
-};
-
-template <typename T1, typename T2, typename T3, typename T4>
-class SequenceWrapper<MonadTuple4<T1, T2, T3, T4>> : public SequenceBase {
-    Sequence<MonadTuple4<T1, T2, T3, T4>>* sequence;
-public:
-    SequenceWrapper(Sequence<MonadTuple4<T1, T2, T3, T4>>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
-
-    void Print() const override {
-        cout << "[ ";
-        for (int i = 0; i < sequence->GetLength(); i++) {
-            if (i > 0) cout << ", ";
-            auto tuple = sequence->Get(i);
-            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ", " << tuple.fourth << ")";
-        }
-        cout << " ]\n";
-    }
-
-    const char* TypeName() const override {
-        return "MonadTuple4Sequence";
-    }
-
-    int GetLength() const override {
-        return sequence->GetLength();
-    }
-    
-    Sequence<MonadTuple4<T1, T2, T3, T4>>* get() const { 
-        return sequence; 
-    }
-};
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5>
-class SequenceWrapper<MonadTuple5<T1, T2, T3, T4, T5>> : public SequenceBase {
-    Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* sequence;
-public:
-    SequenceWrapper(Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
-
-    void Print() const override {
-        cout << "[ ";
-        for (int i = 0; i < sequence->GetLength(); i++) {
-            if (i > 0) cout << ", ";
-            auto tuple = sequence->Get(i);
-            cout << "(" << tuple.first << ", " << tuple.second << ", " << tuple.third << ", " << tuple.fourth << ", " << tuple.fifth << ")";
-        }
-        cout << " ]\n";
-    }
-
-    const char* TypeName() const override {
-        return "MonadTuple5Sequence";
-    }
-
-    int GetLength() const override {
-        return sequence->GetLength();
-    }
-    
-    Sequence<MonadTuple5<T1, T2, T3, T4, T5>>* get() const { 
-        return sequence; 
+    Sequence<int>* GetIntSequence() override {
+        return sequence;
     }
 };
 
 template <typename T1, typename T2>
-class SequenceWrapper<MonadPair<T1, T2>> : public SequenceBase {
-    Sequence<MonadPair<T1, T2>>* sequence;
+class PairSequenceWrapper : public SequenceWrapper {
+    Sequence<Pair<T1, T2>>* sequence;
 public:
-    SequenceWrapper(Sequence<MonadPair<T1, T2>>* seq) : sequence(seq) {}
-    ~SequenceWrapper() { delete sequence; }
+    PairSequenceWrapper(Sequence<Pair<T1, T2>>* seq) : sequence(seq) {}
+    ~PairSequenceWrapper() { delete sequence; }
 
     void Print() const override {
         cout << "[ ";
@@ -188,57 +90,442 @@ public:
     }
 
     const char* TypeName() const override {
-        return "MonadPairSequence";
+        return "PairSequence";
     }
 
     int GetLength() const override {
         return sequence->GetLength();
     }
-    
-    Sequence<MonadPair<T1, T2>>* get() const { 
-        return sequence; 
+
+    Sequence<int>* GetIntSequence() override {
+        return nullptr;
+    }
+
+    Sequence<Pair<T1, T2>>* GetPairSequence() {
+        return sequence->Clone();
     }
 };
 
-
-Option<int> readInt(const string& prompt) {
-    cout << prompt;
-    int value;
-    if (cin >> value) return Option<int>::Some(value);
-    cin.clear();
-    cin.ignore(10000, '\n');
-    return Option<int>::None();
+int multiplyByTwo(const int& x) {
+    return x * 2;
 }
 
-static void handleCreate(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleAppend(vector<shared_ptr<SequenceBase>>& seqs);
-static void handlePrintAll(const vector<shared_ptr<SequenceBase>>& seqs);
-static void handleRemoveSequence(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleSubsequence(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleConcat(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleZip(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleUnzip(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleRemoveItem(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleZipAsTuple(vector<shared_ptr<SequenceBase>>& seqs);
-static void handleUnzipTuple(vector<shared_ptr<SequenceBase>>& seqs);
+int square(const int& x) {
+    return x * x;
+}
 
-Option<int> chooseSequence(const vector<shared_ptr<SequenceBase>>& seqs, const string& prompt) {
-    if (seqs.empty()) {
-        cout << "[Info] No sequences available\n";
-        return Option<int>::None();
+int Negate(const int& x) {
+    return -x;
+}
+
+int addTen(const int& x) {
+    return x + 10;
+}
+
+bool isEven(const int& x) {
+    return x % 2 == 0;
+}
+
+bool isPositive(const int& x) {
+    return x > 0;
+}
+
+bool greaterThanFive(const int& x) {
+    return x > 5;
+}
+
+bool isPrime(const int& x) {
+    if (x <= 1) return false;
+    if (x <= 3) return true;
+    if (x % 2 == 0 || x % 3 == 0) return false;
+    for (int i = 5; i * i <= x; i += 6) {
+        if (x % i == 0 || x % (i + 2) == 0) return false;
     }
+    return true;
+}
+
+int readInt(const string& prompt) {
+    cout << prompt;
+    string input;
+    getline(cin, input);
     
+    stringstream ss(input);
+    int value;
+    if (ss >> value && ss.eof()) {
+        return value;
+    }
+    throw MyException(4, "Invalid integer input");
+}
+
+int chooseSequence(const vector<shared_ptr<SequenceWrapper>>& seqs, const string& prompt) {
+    if (seqs.empty()) {
+        throw MyException(3, "No sequences available");
+    }
     cout << "Available sequences:\n";
     for (size_t i = 0; i < seqs.size(); i++) {
         cout << "  ID=" << i << " (" << seqs[i]->TypeName() 
              << ", len=" << seqs[i]->GetLength() << ")\n";
     }
-    
     return readInt(prompt);
 }
 
+void handleCreate(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int choice = readInt("Choose type:\n 1) ArraySequence\n 2) ListSequence\n 3) ImmutableArraySequence\n 4) ImmutableListSequence\nEnter: ");
+
+    switch (choice) {
+    case 1: {
+        auto seq = new ArraySequence<int>();
+        seqs.push_back(make_shared<TypedSequenceWrapper<int>>(seq));
+        cout << "[OK] Created ArraySequence, ID=" << (seqs.size() - 1) << "\n";
+        break;
+    }
+    case 2: {
+        auto seq = new ListSequence<int>();
+        seqs.push_back(make_shared<TypedSequenceWrapper<int>>(seq));
+        cout << "[OK] Created ListSequence, ID=" << (seqs.size() - 1) << "\n";
+        break;
+    }
+    case 3: {
+        int n = readInt("Enter initial size: ");
+        if (n < 0) {
+            throw MyException(1, "Negative size specified");
+        }
+        ArraySequence<int> tempSeq;
+        for (int i = 0; i < n; i++) {
+            int elem = readInt("arr[" + to_string(i) + "] = ");
+            tempSeq.Append(elem);
+        }
+        auto seq = new ImmutableArraySequence<int>(tempSeq);
+        seqs.push_back(make_shared<TypedSequenceWrapper<int>>(seq));
+        cout << "[OK] Created ImmutableArraySequence, ID=" << (seqs.size() - 1) << "\n";
+        break;
+    }
+    case 4: {
+        int n = readInt("Enter initial size: ");
+        if (n < 0) {
+            throw MyException(1, "Negative size specified");
+        }
+        ArraySequence<int> tempSeq;
+        for (int i = 0; i < n; i++) {
+            int elem = readInt("arr[" + to_string(i) + "] = ");
+            tempSeq.Append(elem);
+        }
+        auto seq = new ImmutableListSequence<int>(tempSeq);
+        seqs.push_back(make_shared<TypedSequenceWrapper<int>>(seq));
+        cout << "[OK] Created ImmutableListSequence, ID=" << (seqs.size() - 1) << "\n";
+        break;
+    }
+    default:
+        throw MyException(4, "Invalid choice");
+    }
+}
+
+void handleAppend(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    int value = readInt("Value to append: ");
+    Sequence<int>* oldSeq = wrapper->GetIntSequence();
+    Sequence<int>* newSeq = oldSeq->Append(value);
+    
+    if (newSeq != oldSeq) {
+        delete oldSeq;
+        seqs[id].reset(new TypedSequenceWrapper<int>(newSeq));
+        cout << "[OK] Appended " << value << " to seq #" << id << " (new immutable sequence)\n";
+    } else {
+        cout << "[OK] Appended " << value << " to seq #" << id << " (mutable sequence)\n";
+    }
+}
+
+void handlePrintAll(const vector<shared_ptr<SequenceWrapper>>& seqs) {
+    if (seqs.empty()) {
+        cout << "[Info] No sequences available\n";
+        return;
+    }
+    
+    cout << "All sequences:\n";
+    for (size_t i = 0; i < seqs.size(); i++) {
+        cout << "ID=" << i << " (" << seqs[i]->TypeName() 
+             << ", len=" << seqs[i]->GetLength() << "): ";
+        seqs[i]->Print();
+    }
+}
+
+void handleRemoveSequence(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID to remove: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+    
+    seqs.erase(seqs.begin() + id);
+    cout << "[OK] Removed sequence #" << id << "\n";
+}
+
+void handleSubsequence(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    int startIndex = readInt("Enter start index: ");
+    int endIndex = readInt("Enter end index: ");
+    
+    Sequence<int>* seq = wrapper->GetIntSequence();
+    Sequence<int>* sub = seq->GetSubsequence(startIndex, endIndex);
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(sub));
+    cout << "[OK] Subsequence added as ID=" << (seqs.size() - 1) << "\n";
+}
+
+void handleConcat(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id1 = chooseSequence(seqs, "Enter first sequence ID: ");
+    int id2 = chooseSequence(seqs, "Enter second sequence ID: ");
+    
+    if (id1 < 0 || id1 >= static_cast<int>(seqs.size()) || 
+        id2 < 0 || id2 >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper1 = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id1].get());
+    auto wrapper2 = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id2].get());
+    if (!wrapper1 || !wrapper2) {
+        throw MyException(5, "Both sequences must contain integers");
+    }
+
+    Sequence<int>* seq1 = wrapper1->GetIntSequence();
+    Sequence<int>* seq2 = wrapper2->GetIntSequence();
+    Sequence<int>* result = seq1->Concat(seq2);
+    
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(result));
+    cout << "[OK] Concatenation added as ID=" << (seqs.size() - 1) << "\n";
+}
+
+void handleZip(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id1 = chooseSequence(seqs, "Enter first sequence ID: ");
+    int id2 = chooseSequence(seqs, "Enter second sequence ID: ");
+    
+    if (id1 < 0 || id1 >= static_cast<int>(seqs.size()) || 
+        id2 < 0 || id2 >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper1 = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id1].get());
+    auto wrapper2 = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id2].get());
+    if (!wrapper1 || !wrapper2) {
+        throw MyException(5, "Both sequences must contain integers");
+    }
+
+    Sequence<int>* seq1 = wrapper1->GetIntSequence();
+    Sequence<int>* seq2 = wrapper2->GetIntSequence();
+    auto* zipped = zip<int, int>(seq1, seq2);
+    
+    seqs.push_back(make_shared<PairSequenceWrapper<int, int>>(zipped));
+    cout << "[OK] Zipped pair sequence added as ID=" << (seqs.size() - 1) << "\n";
+}
+
+void handleUnzip(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter pair sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<PairSequenceWrapper<int, int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Not a pair sequence");
+    }
+
+    Sequence<Pair<int, int>>* pairSeq = wrapper->GetPairSequence();
+    auto res = unzip<int, int>(pairSeq);
+    
+    delete pairSeq;
+    
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(res.first));
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(res.second));
+    cout << "[OK] Unzipped to IDs " << (seqs.size() - 2)
+         << " and " << (seqs.size() - 1) << "\n";
+}
+
+void handleRemoveItem(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    int index = readInt("Enter index to remove: ");
+    Sequence<int>* oldSeq = wrapper->GetIntSequence();
+    Sequence<int>* newSeq = oldSeq->RemoveAt(index);
+    
+    if (newSeq != oldSeq) {
+        delete oldSeq;
+        seqs[id].reset(new TypedSequenceWrapper<int>(newSeq));
+        cout << "[OK] Removed item at index " << index 
+             << " from seq #" << id << " (new immutable sequence)\n";
+    } else {
+        cout << "[OK] Removed item at index " << index 
+             << " from seq #" << id << " (mutable sequence)\n";
+    }
+}
+
+void handleMap(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    cout << "Choose map function:\n"
+         << "1) Multiply by 2\n"
+         << "2) Square\n"
+         << "3) Negate\n"
+         << "4) Add 10\n"
+         << "Enter choice: ";
+    
+    int choice = readInt("");
+    Sequence<int>* seq = wrapper->GetIntSequence();
+    Sequence<int>* result = nullptr;
+    
+    switch (choice) {
+    case 1:
+        result = map<int, int>(seq, multiplyByTwo);
+        break;
+    case 2:
+        result = map<int, int>(seq, square);
+        break;
+    case 3:
+        result = map<int, int>(seq, Negate);
+        break;
+    case 4:
+        result = map<int, int>(seq, addTen);
+        break;
+    default:
+        throw MyException(4, "Invalid choice");
+    }
+    
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(result));
+    cout << "[OK] Mapped sequence added as ID=" << (seqs.size() - 1) << "\n";
+}
+
+void handleWhere(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    cout << "Choose filter condition:\n"
+         << "1) Even numbers only\n"
+         << "2) Positive numbers only\n"
+         << "3) Numbers greater than 5\n"
+         << "4) Prime numbers only\n"
+         << "Enter choice: ";
+    
+    int choice = readInt("");
+    Sequence<int>* seq = wrapper->GetIntSequence();
+    Sequence<int>* result = nullptr;
+    
+    switch (choice) {
+    case 1:
+        result = where<int>(seq, isEven);
+        break;
+    case 2:
+        result = where<int>(seq, isPositive);
+        break;
+    case 3:
+        result = where<int>(seq, greaterThanFive);
+        break;
+    case 4:
+        result = where<int>(seq, isPrime);
+        break;
+    default:
+        throw MyException(4, "Invalid choice");
+    }
+    
+    seqs.push_back(make_shared<TypedSequenceWrapper<int>>(result));
+    cout << "[OK] Filtered sequence added as ID=" << (seqs.size() - 1) << "\n";
+}
+
+void handleReduce(vector<shared_ptr<SequenceWrapper>>& seqs) {
+    int id = chooseSequence(seqs, "Enter sequence ID: ");
+    if (id < 0 || id >= static_cast<int>(seqs.size())) {
+        throw MyException(2, "Invalid sequence ID");
+    }
+
+    auto wrapper = dynamic_cast<TypedSequenceWrapper<int>*>(seqs[id].get());
+    if (!wrapper) {
+        throw MyException(5, "Sequence must contain integers");
+    }
+
+    cout << "Choose reduce operation:\n"
+         << "1) Sum\n"
+         << "2) Product\n"
+         << "3) Maximum\n"
+         << "4) Minimum\n"
+         << "Enter choice: ";
+    
+    int choice = readInt("");
+    Sequence<int>* seq = wrapper->GetIntSequence();
+    int result = 0;
+    
+    switch (choice) {
+    case 1: {
+        int sum = reduce<int>(seq, [](const int& a, const int& b) { return a + b; }, 0);
+        result = sum;
+        break;
+    }
+    case 2: {
+        int product = reduce<int>(seq, [](const int& a, const int& b) { return a * b; }, 1);
+        result = product;
+        break;
+    }
+    case 3: {
+        if (seq->GetLength() == 0) {
+            throw MyException(3, "Sequence is empty");
+        }
+        int maxVal = reduce<int>(seq, [](const int& a, const int& b) { return a > b ? a : b; }, seq->Get(0));
+        result = maxVal;
+        break;
+    }
+    case 4: {
+        if (seq->GetLength() == 0) {
+            throw MyException(3, "Sequence is empty");
+        }
+        int minVal = reduce<int>(seq, [](const int& a, const int& b) { return a < b ? a : b; }, seq->Get(0));
+        result = minVal;
+        break;
+    }
+    default:
+        throw MyException(4, "Invalid choice");
+    }
+    
+    cout << "[OK] Reduce result: " << result << "\n";
+}
+
 void runUI() {
-    vector<shared_ptr<SequenceBase>> seqs;
+    vector<shared_ptr<SequenceWrapper>> seqs;
     bool running = true;
 
     while (running) {
@@ -253,18 +540,13 @@ void runUI() {
                  << "7) Zip (pair)\n"
                  << "8) Unzip (pair)\n"
                  << "9) Remove item\n"
-                 << "10) Zip as Tuple (multiple)\n"
-                 << "11) Unzip Tuple (multiple)\n"
+                 << "10) Map (transform)\n"
+                 << "11) Where (filter)\n"
+                 << "12) Reduce (aggregate)\n"
                  << "0) Exit\n"
                  << "Choose: ";
 
-            auto cmdOption = readInt("");
-            if (cmdOption.IsNone()) {
-                cout << "[Error] Invalid input\n";
-                continue;
-            }
-
-            int cmd = cmdOption.Unwrap();
+            int cmd = readInt("");
             switch (cmd) {
             case 1: handleCreate(seqs); break;
             case 2: handleAppend(seqs); break;
@@ -275,11 +557,15 @@ void runUI() {
             case 7: handleZip(seqs); break;
             case 8: handleUnzip(seqs); break;
             case 9: handleRemoveItem(seqs); break;
-            case 10: handleZipAsTuple(seqs); break;
-            case 11: handleUnzipTuple(seqs); break;
+            case 10: handleMap(seqs); break;
+            case 11: handleWhere(seqs); break;
+            case 12: handleReduce(seqs); break;
             case 0: running = false; break;
             default: cout << "[Warn] Unknown command\n";
             }
+        }
+        catch (const MyException& ex) {
+            cout << "[Error] " << ex.what() << "\n";
         }
         catch (const exception& ex) {
             cout << "[Error] " << ex.what() << "\n";
@@ -288,395 +574,4 @@ void runUI() {
 
     seqs.clear();
     cout << "Program finished.\n";
-}
-
-static void handleCreate(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto choice = readInt("Choose type:\n"
-                         " 1) ArraySequence\n"
-                         " 2) ListSequence\n"
-                         " 3) ImmutableArraySequence\n"
-                         " 4) ImmutableListSequence\n"
-                         "Enter: ");
-    if (choice.IsNone()) {
-        cout << "[Error] Invalid choice\n";
-        return;
-    }
-
-    switch (choice.Unwrap()) {
-    case 1: {
-        auto seq = new ArraySequence<int>();
-        seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
-        cout << "[OK] Created ArraySequence, ID=" << (seqs.size() - 1) << "\n";
-        break;
-    }
-    case 2: {
-        auto seq = new ListSequence<int>();
-        seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
-        cout << "[OK] Created ListSequence, ID=" << (seqs.size() - 1) << "\n";
-        break;
-    }
-    case 3: {
-        auto nOption = readInt("Enter initial size: ");
-        if (nOption.IsNone() || nOption.Unwrap() < 0) {
-            cout << "[Error] Invalid size\n";
-            return;
-        }
-        int n = nOption.Unwrap();
-        ArraySequence<int> tempSeq;
-        for (int i = 0; i < n; i++) {
-            auto elemOption = readInt("arr[" + to_string(i) + "] = ");
-            if (elemOption.IsNone()) {
-                cout << "[Error] Invalid element\n";
-                return;
-            }
-            tempSeq.Append(elemOption.Unwrap());
-        }
-        auto seq = new ImmutableArraySequence<int>(tempSeq);
-        seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
-        cout << "[OK] Created ImmutableArraySequence, ID=" << (seqs.size() - 1) << "\n";
-        break;
-    }
-    case 4: {
-        auto nOption = readInt("Enter initial size: ");
-        if (nOption.IsNone() || nOption.Unwrap() < 0) {
-            cout << "[Error] Invalid size\n";
-            return;
-        }
-        int n = nOption.Unwrap();
-        ArraySequence<int> tempSeq;
-        for (int i = 0; i < n; i++) {
-            auto elemOption = readInt("arr[" + to_string(i) + "] = ");
-            if (elemOption.IsNone()) {
-                cout << "[Error] Invalid element\n";
-                return;
-            }
-            tempSeq.Append(elemOption.Unwrap());
-        }
-        auto seq = new ImmutableListSequence<int>(tempSeq);
-        seqs.push_back(make_shared<SequenceWrapper<int>>(seq));
-        cout << "[OK] Created ImmutableListSequence, ID=" << (seqs.size() - 1) << "\n";
-        break;
-    }
-    default:
-        cout << "[Error] Invalid choice\n";
-    }
-}
-
-static void handleAppend(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
-    if (!wrapper) {
-        cout << "[Error] Sequence must contain integers\n";
-        return;
-    }
-
-    auto valOption = readInt("Value to append: ");
-    if (valOption.IsNone()) {
-        cout << "[Error] Invalid value\n";
-        return;
-    }
-
-    Sequence<int>* oldSeq = wrapper->get();
-    Sequence<int>* newSeq = oldSeq->Append(valOption.Unwrap());
-    
-    if (newSeq != oldSeq) {
-        auto newWrapper = new SequenceWrapper<int>(newSeq);
-        seqs[id].reset(newWrapper);
-        cout << "[OK] Appended " << valOption.Unwrap() << " to seq #" << id << " (new immutable sequence)\n";
-    } else {
-        cout << "[OK] Appended " << valOption.Unwrap() << " to seq #" << id << " (mutable sequence)\n";
-    }
-}
-
-static void handleRemoveSequance(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
-    if (!wrapper) {
-        cout << "[Error] Sequence must contain integers\n";
-        return;
-    }
-
-    auto idxOption = readInt("Enter index to remove: ");
-    if (idxOption.IsNone()) {
-        cout << "[Error] Invalid index\n";
-        return;
-    }
-
-    Sequence<int>* oldSeq = wrapper->get();
-    Sequence<int>* newSeq = oldSeq->RemoveAt(idxOption.Unwrap());
-    
-    if (newSeq != oldSeq) {
-        auto newWrapper = new SequenceWrapper<int>(newSeq);
-        seqs[id].reset(newWrapper);
-        cout << "[OK] Removed item at index " << idxOption.Unwrap() 
-             << " from seq #" << id << " (new immutable sequence)\n";
-    } else {
-        cout << "[OK] Removed item at index " << idxOption.Unwrap() 
-             << " from seq #" << id << " (mutable sequence)\n";
-    }
-}
-
-static void handleSubsequence(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
-    if (!wrapper) {
-        cout << "[Error] Sequence must contain integers\n";
-        return;
-    }
-
-    auto stOption = readInt("Enter start index: ");
-    auto enOption = readInt("Enter end index: ");
-    if (stOption.IsNone() || enOption.IsNone()) {
-        cout << "[Error] Invalid indices\n";
-        return;
-    }
-
-    int st = stOption.Unwrap();
-    int en = enOption.Unwrap();
-    Sequence<int>* sub = wrapper->get()->GetSubsequence(st, en);
-    seqs.push_back(make_shared<SequenceWrapper<int>>(sub));
-    cout << "[OK] Subsequence added as ID=" << (seqs.size() - 1) << "\n";
-}
-
-static void handleConcat(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto id1Option = chooseSequence(seqs, "Enter first sequence ID: ");
-    auto id2Option = chooseSequence(seqs, "Enter second sequence ID: ");
-    if (id1Option.IsNone() || id2Option.IsNone()) return;
-    
-    int id1 = id1Option.Unwrap();
-    int id2 = id2Option.Unwrap();
-    if (id1 < 0 || id1 >= static_cast<int>(seqs.size()) || 
-        id2 < 0 || id2 >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper1 = dynamic_cast<SequenceWrapper<int>*>(seqs[id1].get());
-    auto wrapper2 = dynamic_cast<SequenceWrapper<int>*>(seqs[id2].get());
-    if (!wrapper1 || !wrapper2) {
-        cout << "[Error] Both sequences must contain integers\n";
-        return;
-    }
-
-    Sequence<int>* result = wrapper1->get()->Concat(wrapper2->get());
-    seqs.push_back(make_shared<SequenceWrapper<int>>(result));
-    cout << "[OK] Concatenation added as ID=" << (seqs.size() - 1) << "\n";
-}
-
-static void handleZip(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto id1Option = chooseSequence(seqs, "Enter first sequence ID: ");
-    auto id2Option = chooseSequence(seqs, "Enter second sequence ID: ");
-    if (id1Option.IsNone() || id2Option.IsNone()) return;
-    
-    int id1 = id1Option.Unwrap();
-    int id2 = id2Option.Unwrap();
-    if (id1 < 0 || id1 >= static_cast<int>(seqs.size()) || 
-        id2 < 0 || id2 >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper1 = dynamic_cast<SequenceWrapper<int>*>(seqs[id1].get());
-    auto wrapper2 = dynamic_cast<SequenceWrapper<int>*>(seqs[id2].get());
-    if (!wrapper1 || !wrapper2) {
-        cout << "[Error] Both sequences must contain integers\n";
-        return;
-    }
-
-    auto* zipped = zip<int, int>(wrapper1->get(), wrapper2->get());
-    seqs.push_back(make_shared<SequenceWrapper<MonadPair<int, int>>>(zipped));
-    cout << "[OK] Zipped pair sequence added as ID=" << (seqs.size() - 1) << "\n";
-}
-
-static void handleUnzip(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter pair sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper = dynamic_cast<SequenceWrapper<MonadPair<int, int>>*>(seqs[id].get());
-    if (!wrapper) {
-        cout << "[Error] Not a pair sequence\n";
-        return;
-    }
-
-    auto res = unzip<int, int>(wrapper->get());
-    seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
-    seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
-    cout << "[OK] Unzipped to IDs " << (seqs.size() - 2)
-         << " and " << (seqs.size() - 1) << "\n";
-}
-
-static void handleRemoveItem(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
-    if (!wrapper) {
-        cout << "[Error] Sequence must contain integers\n";
-        return;
-    }
-
-    auto idxOption = readInt("Enter index to remove: ");
-    if (idxOption.IsNone()) {
-        cout << "[Error] Invalid index\n";
-        return;
-    }
-
-    Sequence<int>* newSeq = wrapper->get()->RemoveAt(idxOption.Unwrap());
-    seqs[id] = make_shared<SequenceWrapper<int>>(newSeq);
-    cout << "[OK] Removed item at index " << idxOption.Unwrap() 
-         << " from seq #" << id << "\n";
-}
-
-static void handleZipAsTuple(vector<shared_ptr<SequenceBase>>& seqs) {
-    if (seqs.empty()) {
-        cout << "[Warn] No sequences available\n";
-        return;
-    }
-    
-    auto countOption = readInt("Enter number of sequences to zip (min 2, max 5): ");
-    if (countOption.IsNone() || countOption.Unwrap() < 2 || countOption.Unwrap() > 5) {
-        cout << "[Error] Invalid number\n";
-        return;
-    }
-    
-    int count = countOption.Unwrap();
-    vector<int> ids;
-    vector<Sequence<int>*> sequences;
-    
-    for (int i = 0; i < count; i++) {
-        auto idOption = chooseSequence(seqs, "Enter sequence ID " + to_string(i+1) + ": ");
-        if (idOption.IsNone()) return;
-        
-        int id = idOption.Unwrap();
-        if (id < 0 || id >= static_cast<int>(seqs.size())) {
-            cout << "[Error] Invalid sequence ID\n";
-            return;
-        }
-        
-        auto wrapper = dynamic_cast<SequenceWrapper<int>*>(seqs[id].get());
-        if (!wrapper) {
-            cout << "[Error] Sequence must contain integers\n";
-            return;
-        }
-        
-        ids.push_back(id);
-        sequences.push_back(wrapper->get());
-    }
-    
-    shared_ptr<SequenceBase> result;
-    
-    switch (count) {
-        case 2: {
-            auto* zipped = zip_as_tuple(sequences[0], sequences[1]);
-            result = make_shared<SequenceWrapper<MonadTuple2<int, int>>>(zipped);
-            break;
-        }
-        case 3: {
-            auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2]);
-            result = make_shared<SequenceWrapper<MonadTuple3<int, int, int>>>(zipped);
-            break;
-        }
-        case 4: {
-            auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2], sequences[3]);
-            result = make_shared<SequenceWrapper<MonadTuple4<int, int, int, int>>>(zipped);
-            break;
-        }
-        case 5: {
-            auto* zipped = zip_as_tuple(sequences[0], sequences[1], sequences[2], sequences[3], sequences[4]);
-            result = make_shared<SequenceWrapper<MonadTuple5<int, int, int, int, int>>>(zipped);
-            break;
-        }
-        default:
-            cout << "[Error] Unsupported number of sequences\n";
-            return;
-    }
-    
-    seqs.push_back(result);
-    cout << "[OK] Zipped tuple sequence added as ID=" << (seqs.size() - 1) << "\n";
-}
-
-static void handleUnzipTuple(vector<shared_ptr<SequenceBase>>& seqs) {
-    auto idOption = chooseSequence(seqs, "Enter tuple sequence ID: ");
-    if (idOption.IsNone()) return;
-    
-    int id = idOption.Unwrap();
-    if (id < 0 || id >= static_cast<int>(seqs.size())) {
-        cout << "[Error] Invalid sequence ID\n";
-        return;
-    }
-
-    if (auto wrapper2 = dynamic_cast<SequenceWrapper<MonadTuple2<int, int>>*>(seqs[id].get())) {
-        auto res = unzip_tuple(wrapper2->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
-        cout << "[OK] Unzipped to IDs " << (seqs.size() - 2)
-             << " and " << (seqs.size() - 1) << "\n";
-    }
-    else if (auto wrapper3 = dynamic_cast<SequenceWrapper<MonadTuple3<int, int, int>>*>(seqs[id].get())) {
-        auto res = unzip_tuple(wrapper3->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
-        cout << "[OK] Unzipped to IDs " << (seqs.size() - 3)
-             << ", " << (seqs.size() - 2) << " and " << (seqs.size() - 1) << "\n";
-    }
-    else if (auto wrapper4 = dynamic_cast<SequenceWrapper<MonadTuple4<int, int, int, int>>*>(seqs[id].get())) {
-        auto res = unzip_tuple(wrapper4->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fourth));
-        cout << "[OK] Unzipped to IDs " << (seqs.size() - 4) << ", " << (seqs.size() - 3)
-             << ", " << (seqs.size() - 2) << " and " << (seqs.size() - 1) << "\n";
-    }
-    else if (auto wrapper5 = dynamic_cast<SequenceWrapper<MonadTuple5<int, int, int, int, int>>*>(seqs[id].get())) {
-        auto res = unzip_tuple(wrapper5->get());
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.first));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.second));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.third));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fourth));
-        seqs.push_back(make_shared<SequenceWrapper<int>>(res.fifth));
-        cout << "[OK] Unzipped to IDs " << (seqs.size() - 5) << ", " << (seqs.size() - 4)
-             << ", " << (seqs.size() - 3) << ", " << (seqs.size() - 2) 
-             << " and " << (seqs.size() - 1) << "\n";
-    }
-    else {
-        cout << "[Error] Unsupported tuple sequence type\n";
-    }
 }

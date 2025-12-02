@@ -1,8 +1,7 @@
 #pragma once
+
 #include "DynamicArray.h"
 #include "Sequence.h"
-#include <stdexcept>
-#include "Exception.h"
 
 template <class T>
 class ArraySequence : public Sequence<T> {
@@ -33,7 +32,7 @@ public:
 
     ArraySequence(const T* arr, int length) {
         if (length < 0) {
-            throw MyException(ErrorType::NegativeSize, 0);
+            throw MyException(1, "Negative size specified");
         }
         capacity = (length == 0) ? 4 : length * 2;
         items = new DynamicArray<T>(capacity);
@@ -55,24 +54,24 @@ public:
 
     virtual T GetFirst() const override {
         if (count == 0) {
-            throw MyException(ErrorType::OutOfRange, 2);
+            throw MyException(3, "Sequence is empty");
         }
         return items->Get(0);
     }
 
     virtual T GetLast() const override {
         if (count == 0) {
-            throw MyException(ErrorType::OutOfRange, 2);
+            throw MyException(3, "Sequence is empty");
         }
         return items->Get(count - 1);
     }
 
     virtual T Get(int index) const override {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         return items->Get(index);
     }
@@ -83,10 +82,10 @@ public:
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const override {
         if (startIndex < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (endIndex < 0 || startIndex > endIndex || endIndex >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         int newLen = endIndex - startIndex + 1;
         T* temp = new T[newLen];
@@ -111,7 +110,7 @@ public:
 
     virtual Sequence<T>* RemoveAt(int index) override {
         if (index < 0 || index >= count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         for (int i = index; i < count - 1; i++) {
             items->Set(i, items->Get(i + 1));
@@ -132,12 +131,11 @@ public:
 
     virtual Sequence<T>* InsertAt(const T& item, int index) override {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index > count) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
-        
         resizeIfNeeded();
         for (int i = count; i > index; i--) {
             items->Set(i, items->Get(i - 1));
@@ -153,15 +151,6 @@ public:
             newSeq->Append(seq->Get(i));
         }
         return newSeq;
-    }
-
-    void reverse() {
-        int n = count;
-        for (int i = 0; i < n / 2; ++i) {
-            T tmp = items->Get(i);
-            items->Set(i, items->Get(n - 1 - i));
-            items->Set(n - 1 - i, tmp);
-        }
     }
 
     virtual Sequence<T>* Clone() const override {

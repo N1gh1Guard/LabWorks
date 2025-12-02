@@ -1,33 +1,37 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -I.
+PROGRAM = program
+TEST = tests
 
-MAIN_SRCS = main.cpp UI.cpp Error.cpp
-MAIN_OBJS = $(MAIN_SRCS:.cpp=.o)
-MAIN_TARGET = lab
+SOURCES = main.cpp UI.cpp Exception.cpp
+OBJECTS = $(SOURCES:.cpp=.o)
 
-TEST_SRCS = tests.cpp
-TEST_OBJS = $(TEST_SRCS:.cpp=.o)
-TEST_TARGET = tests
+TEST_SOURCES = tests.cpp Exception.cpp
+TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 
-.PHONY: all clean run test
+HEADERS = Exception.h Sequence.h DynamicArray.h LinkedList.h \
+          ArraySequence.h ListSequence.h \
+          ImmutableArraySequence.h ImmutableListSequence.h \
+          Functions.h Pair.h UI.h
 
-all: $(MAIN_TARGET) $(TEST_TARGET)
+all: $(PROGRAM) $(TEST)
 
-$(MAIN_TARGET): $(MAIN_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+$(PROGRAM): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(PROGRAM)
 
-$(TEST_TARGET): $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+$(TEST): $(TEST_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(TEST_OBJECTS) -o $(TEST)
 
-%.o: %.cpp
+%.o: %.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-clean:
-	rm -f $(MAIN_OBJS) $(TEST_OBJS) $(MAIN_TARGET) $(TEST_TARGET) *.d
-	rm -f $(MAIN_OBJS) $(TEST_OBJS) $(MAIN_TARGET) $(TEST_TARGET) *.exe
-	
-run: $(MAIN_TARGET)
-	./$(MAIN_TARGET)
+run: $(PROGRAM)
+	./$(PROGRAM)
 
-test: $(TEST_TARGET)
-	./$(TEST_TARGET)
+test: $(TEST)
+	./$(TEST)
+
+clean:
+	rm -f *.o $(PROGRAM) $(TEST)
+
+.PHONY: all run test clean

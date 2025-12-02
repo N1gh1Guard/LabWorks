@@ -1,7 +1,6 @@
 #pragma once
 #include "Sequence.h"
 #include "LinkedList.h"
-#include "Exception.h"
 
 template <class T>
 class ListSequence : public Sequence<T> {
@@ -15,10 +14,6 @@ public:
 
     ListSequence(T* arr, int count) {
         list = new LinkedList<T>(arr, count);
-    }
-
-    ListSequence(std::initializer_list<T> initList) {
-        list = new LinkedList<T>(initList);
     }
 
     ListSequence(const ListSequence<T>& other) {
@@ -54,10 +49,10 @@ public:
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const override {
         if (startIndex < 0 || endIndex < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (startIndex > endIndex || endIndex >= list->GetLength()) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         LinkedList<T>* subList = list->GetSubList(startIndex, endIndex);
         ListSequence<T>* result = new ListSequence<T>();
@@ -96,18 +91,6 @@ public:
             result->Append(seq->Get(i));
         }
         return result;
-    }
-
-    void reverse() {
-        list->reverse();
-    }
-
-    void ReverseSmart() {
-        list->ReverseSmart();
-    }
-
-    void smartReverse() {
-        list->ReverseSmart();
     }
 
     virtual Sequence<T>* Clone() const override {

@@ -1,5 +1,5 @@
 #pragma once
-#include <stdexcept>
+
 #include "Exception.h"
 
 template <class T>
@@ -11,7 +11,7 @@ private:
 public:
     DynamicArray(const T* items, int count) {
         if (count < 0) {
-            throw MyException(ErrorType::NegativeSize, 0);
+            throw MyException(1, "Negative size specified");
         }
         size = count;
         data = new T[size];
@@ -22,7 +22,7 @@ public:
 
     DynamicArray(int size) {
         if (size < 0) {
-            throw MyException(ErrorType::NegativeSize, 0);
+            throw MyException(1, "Negative size specified");
         }
         this->size = size;
         data = new T[size];
@@ -49,27 +49,27 @@ public:
 
     T Get(int index) const {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= size) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         return data[index];
     }
 
     void Set(int index, const T& value) {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= size) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         data[index] = value;
     }
 
     void Resize(int newSize) {
         if (newSize < 0) {
-            throw MyException(ErrorType::NegativeSize, 0);
+            throw MyException(1, "Negative size specified");
         }
         T* newData = new T[newSize];
         int minSize = (newSize < size) ? newSize : size;
@@ -98,20 +98,20 @@ public:
 
     T& operator[](int index) {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= size) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         return data[index];
     }
 
     const T& operator[](int index) const {
         if (index < 0) {
-            throw MyException(ErrorType::OutOfRange, 0);
+            throw MyException(2, "Index out of range");
         }
         if (index >= size) {
-            throw MyException(ErrorType::OutOfRange, 1);
+            throw MyException(2, "Index out of range");
         }
         return data[index];
     }

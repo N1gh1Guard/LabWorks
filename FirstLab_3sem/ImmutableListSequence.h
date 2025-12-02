@@ -8,13 +8,6 @@ class ImmutableListSequence : public Sequence<T> {
 private:
     LinkedList<T>* list;
 
-    ImmutableListSequence(const Sequence<T>& other) {
-        list = new LinkedList<T>();
-        for (int i = 0; i < other.GetLength(); i++) {
-            list->Append(other.Get(i));
-        }
-    }
-    
     void copyFrom(const LinkedList<T>& source) {
         list = new LinkedList<T>(source);
     }
@@ -97,11 +90,9 @@ public:
 
     virtual Sequence<T>* Concat(const Sequence<T>* other) const override {
         ImmutableListSequence<T>* result = new ImmutableListSequence<T>(*this);
-        
         for (int i = 0; i < other->GetLength(); i++) {
             result->list->Append(other->Get(i));
         }
-        
         return result;
     }
 
