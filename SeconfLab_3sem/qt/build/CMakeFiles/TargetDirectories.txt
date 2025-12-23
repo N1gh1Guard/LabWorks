@@ -1,5 +1,0 @@
-/home/bogdan/Desktop/CPP/ProgLabs/Laba2/qt/build/CMakeFiles/Laba2GUI.dir
-/home/bogdan/Desktop/CPP/ProgLabs/Laba2/qt/build/CMakeFiles/edit_cache.dir
-/home/bogdan/Desktop/CPP/ProgLabs/Laba2/qt/build/CMakeFiles/rebuild_cache.dir
-/home/bogdan/Desktop/CPP/ProgLabs/Laba2/qt/build/CMakeFiles/Laba2GUI_autogen_timestamp_deps.dir
-/home/bogdan/Desktop/CPP/ProgLabs/Laba2/qt/build/CMakeFiles/Laba2GUI_autogen.dir
