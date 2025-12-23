@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/Laba2GUI.dir/Laba2GUI_autogen/mocs_compilation.cpp.o CMakeFiles/Laba2GUI.dir/main_qt.cpp.o CMakeFiles/Laba2GUI.dir/main_window.cpp.o -o Laba2GUI  /usr/lib/x86_64-linux-gnu/libQt5Widgets.so.5.15.13 /usr/lib/x86_64-linux-gnu/libQt5Gui.so.5.15.13 /usr/lib/x86_64-linux-gnu/libQt5Core.so.5.15.13 
