@@ -95,7 +95,7 @@ bool LRUCache<K, V>::contains(const K& key) const {
 template <typename K, typename V>
 V LRUCache<K, V>::get(const K& key) {
     if (!contains(key)) {
-        throw std::out_of_range("LRUCache::get - key not found");
+        throw std::out_of_range("LRUCache::get - key not found"); // Удалить
     }
     Node* node = index_.at(key);
     move_to_front(node);
