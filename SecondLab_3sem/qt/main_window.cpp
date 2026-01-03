@@ -2,6 +2,9 @@
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>
+#include <QFile>
+#include <QTextStream>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -133,9 +136,14 @@ QWidget* MainWindow::createAlphabetWidget()
     QGroupBox *textGroup = new QGroupBox("Text Input");
     QVBoxLayout *textLayout = new QVBoxLayout();
     textInput_ = new QTextEdit();
-    textInput_->setPlaceholderText("Enter text here...");
+    textInput_->setPlaceholderText("Enter text here or load from file...");
     textInput_->setMaximumHeight(150);
     textLayout->addWidget(textInput_);
+    
+    QPushButton *loadFileBtn = new QPushButton("Load File (.txt)");
+    connect(loadFileBtn, &QPushButton::clicked, this, &MainWindow::onLoadFileClicked);
+    textLayout->addWidget(loadFileBtn);
+    
     textGroup->setLayout(textLayout);
 
     // Settings group
@@ -335,6 +343,40 @@ void MainWindow::onShowPointerClicked()
     
     QString pointerText = QString::fromStdString(indexManager_->get_pointer_string());
     indexResultText_->setPlainText(pointerText);
+}
+
+void MainWindow::onLoadFileClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        "Open Text File",
+        "",
+        "Text Files (*.txt);;All Files (*)"
+    );
+    
+    if (fileName.isEmpty()) {
+        return; // User cancelled
+    }
+    
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", 
+            QString("Cannot open file: %1\n%2").arg(fileName, file.errorString()));
+        return;
+    }
+    
+    QTextStream in(&file);
+    QString content = in.readAll();
+    file.close();
+    
+    if (content.isEmpty()) {
+        QMessageBox::warning(this, "Warning", "File is empty!");
+        return;
+    }
+    
+    textInput_->setPlainText(content);
+    indexResultText_->setPlainText(QString("File loaded successfully: %1\nCharacters: %2\nWords will be parsed when you click 'Build Index'")
+        .arg(fileName).arg(content.length()));
 }
 
 void MainWindow::updateKeyList()

@@ -13,6 +13,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QFileDialog>
 
 #include "../hpp/AlphabetIndex.hpp"
 #include "../hpp/GuiFunctions.hpp"
@@ -43,6 +44,7 @@ private slots:
     void onLookupWordClicked();
     void onShowPagesClicked();
     void onShowPointerClicked();
+    void onLoadFileClicked();
 
 private:
     void setupDatabaseTab();
