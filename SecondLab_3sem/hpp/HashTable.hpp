@@ -7,10 +7,9 @@
 
 #include "Errors.hpp"
 #include "HashFunc.hpp"
-#include "IDictionary.hpp"
 
 template <class K, class V>
-class HashTable final : public IDictionary<K, V> {
+class HashTable final {
 private:
     struct BucketEntry {
         K key;
@@ -37,18 +36,18 @@ public:
     HashTable& operator=(const HashTable& other);
     HashTable(HashTable&& other) noexcept;
     HashTable& operator=(HashTable&& other) noexcept;
-    ~HashTable() override;
+    ~HashTable();
 
-    void insert(const K& key, const V& value) override;
-    bool erase(const K& key) override;
-    bool contains(const K& key) const override;
-    V& at(const K& key) override;
-    const V& at(const K& key) const override;
-    std::optional<V> get(const K& key) const override;
-    std::vector<K> keys() const override;
-    void clear() override;
-    std::size_t size() const override;
-    std::size_t capacity() const override;
+    void insert(const K& key, const V& value);
+    bool erase(const K& key);
+    bool contains(const K& key) const;
+    V& at(const K& key);
+    const V& at(const K& key) const;
+    std::optional<V> get(const K& key) const;
+    std::vector<K> keys() const;
+    void clear();
+    std::size_t size() const;
+    std::size_t capacity() const;
 };
 
 template <class K, class V>

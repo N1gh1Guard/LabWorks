@@ -3,7 +3,7 @@
 #include "HashTable.hpp"
 
 template <typename K, typename V>
-class Dictionary final : public IDictionary<K, V> {
+class Dictionary final {
 private:
     HashTable<K, V> table_;
 
@@ -15,18 +15,18 @@ public:
     Dictionary& operator=(const Dictionary& other);
     Dictionary(Dictionary&& other) noexcept;
     Dictionary& operator=(Dictionary&& other) noexcept;
-    ~Dictionary() override;
+    ~Dictionary();
 
-    void insert(const K& key, const V& value) override;
-    bool erase(const K& key) override;
-    bool contains(const K& key) const override;
-    V& at(const K& key) override;
-    const V& at(const K& key) const override;
-    std::optional<V> get(const K& key) const override;
-    std::vector<K> keys() const override;
-    void clear() override;
-    std::size_t size() const override;
-    std::size_t capacity() const override;
+    void insert(const K& key, const V& value);
+    bool erase(const K& key);
+    bool contains(const K& key) const;
+    V& at(const K& key);
+    const V& at(const K& key) const;
+    std::optional<V> get(const K& key) const;
+    std::vector<K> keys() const;
+    void clear();
+    std::size_t size() const;
+    std::size_t capacity() const;
 };
 
 template <typename K, typename V>

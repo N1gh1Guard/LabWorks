@@ -5,10 +5,9 @@
 #include <utility>
 
 #include "Dictionary.hpp"
-#include "ICache.hpp"
 
 template <typename K, typename V>
-class LRUCache final : public ICache<K, V> {
+class LRUCache final {
 private:
     struct Node {
         K key;
@@ -38,12 +37,12 @@ public:
 
     LRUCache(LRUCache&& other) noexcept;
     LRUCache& operator=(LRUCache&& other) noexcept;
-    ~LRUCache() override;
+    ~LRUCache();
 
-    bool contains(const K& key) const override;
-    V get(const K& key) override;
-    void put(const K& key, const V& value) override;
-    std::size_t size() const override;
+    bool contains(const K& key) const;
+    V get(const K& key);
+    void put(const K& key, const V& value);
+    std::size_t size() const;
     void clear();
     bool erase(const K& key);
 };
