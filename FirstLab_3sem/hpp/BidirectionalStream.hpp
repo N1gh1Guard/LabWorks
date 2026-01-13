@@ -1,27 +1,44 @@
 #pragma once
-#include <cstddef>
-#include <string>
-#include "Exceptions.hpp"
+#include "ReadOnlyStream.hpp"
+#include "WriteOnlyStream.hpp"
 
 template <typename T>
-class StreamBase {
+class BidirectionalStream {
 public:
-    virtual ~StreamBase() = default;
+    explicit BidirectionalStream(std::vector<T>* seq)
+        : readStream(seq), writeStream(seq) {}
     
-    // Управление потоком
-    virtual void Open() = 0;
-    virtual void Close() = 0;
-    virtual bool IsOpen() const = 0;
+    void Open() {
+        readStream.Open();
+        writeStream.Open();
+    }
     
-    // Информация о позиции
-    virtual size_t GetPosition() const = 0;
+    void Close() {
+        readStream.Close();
+        writeStream.Close();
+    }
     
-    // Поддержка операций
-    virtual bool IsCanSeek() const { return false; }
-    virtual bool IsCanGoBack() const { return false; }
-    virtual bool IsEndOfStream() const = 0;
+    T Read() { 
+        return readStream.Read(); 
+    }
     
-protected:
-    size_t position = 0;
-    bool isOpen = false;
+    size_t Write(const T& element) { 
+        return writeStream.Write(element); 
+    }
+    
+    size_t GetReadPosition() const { 
+        return readStream.GetPosition(); 
+    }
+    
+    size_t GetWritePosition() const { 
+        return writeStream.GetPosition(); 
+    }
+    
+    bool IsEndOfStream() const { 
+        return readStream.IsEndOfStream(); 
+    }
+    
+private:
+    ReadOnlyStream<T> readStream;
+    WriteOnlyStream<T> writeStream;
 };
