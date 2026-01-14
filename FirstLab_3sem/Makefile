@@ -29,32 +29,30 @@ TARGET = $(BUILD_DIR)/streamlab
 # SOURCE FILES
 # ═══════════════════════════════════════════════════════════════
 
-HEADERS = \
+# C++ source files that need to be compiled
+SOURCES = \
+	main.cpp \
+	mainwindow.cpp \
+	Boyer-widget.cpp \
+	NFA-widget.cpp \
+	SpellChecker-widget.cpp
+
+# Headers with Q_OBJECT that need MOC
+MOC_HEADERS = \
 	mainwindow.hpp \
 	Boyer-widget.hpp \
-	NFA-windget.hpp \
-	SpellChecker-widget.hpp \
-	SpellChecker.hpp \
-	Boyer-Moore-Horspool.hpp \
-	NFA-to-DFA.hpp \
-	Exceptions.hpp \
-	ReadOnlyStream.hpp \
-	WriteOnlyStream.hpp \
-	BidirectionalStream.hpp \
-	tests.hpp
-
-SOURCES = mainwindow.cpp
+	NFA-widget.hpp \
+	SpellChecker-widget.hpp
 
 # Generate MOC filenames
-MOC_HEADERS = $(HEADERS)
 MOC_SOURCES = $(addprefix $(BUILD_DIR)/, $(MOC_HEADERS:.hpp=_moc.cpp))
 MOC_OBJECTS = $(MOC_SOURCES:.cpp=.o)
 
-# All objects
+# All object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:.cpp=.o)) $(MOC_OBJECTS)
 
 # ═══════════════════════════════════════════════════════════════
-# TARGETS
+# BUILD RULES
 # ═══════════════════════════════════════════════════════════════
 
 all: $(TARGET)
@@ -64,12 +62,12 @@ $(TARGET): $(OBJECTS) | $(BUILD_DIR)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $(TARGET)
 	@echo "✓ Build complete: $(TARGET)"
 
-# Compile C++ sources
+# Compile C++ source files
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	@echo "Compiling $<..."
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Generate MOC files
+# Generate MOC files from headers
 $(BUILD_DIR)/%_moc.cpp: %.hpp | $(BUILD_DIR)
 	@echo "Generating moc for $<..."
 	$(MOC) $(QT_CFLAGS) $< -o $@
@@ -87,11 +85,16 @@ $(BUILD_DIR):
 # PHONY TARGETS
 # ═══════════════════════════════════════════════════════════════
 
-.PHONY: all clean run install help info
+.PHONY: all clean run test install help info
 
 run: $(TARGET)
 	@echo "Running $(TARGET)..."
 	./$(TARGET)
+
+test: $(TARGET)
+	@echo "Running unit tests..."
+	./$(TARGET)
+	@echo "✓ Tests completed"
 
 clean:
 	@echo "Cleaning build artifacts..."
@@ -108,7 +111,8 @@ help:
 	@echo ""
 	@echo "Available targets:"
 	@echo "  make          - Build the project"
-	@echo "  make run      - Build and run"
+	@echo "  make run      - Build and run the application"
+	@echo "  make test     - Build and run unit tests"
 	@echo "  make clean    - Remove build artifacts"
 	@echo "  make install  - Install binary to /usr/local/bin"
 	@echo "  make help     - Show this help message"
@@ -128,6 +132,6 @@ info:
 	@echo "  MOC:        $(MOC)"
 	@echo "  Target:     $(TARGET)"
 	@echo "  Objects:    $(words $(OBJECTS)) files"
-	@echo "  Headers:    $(words $(HEADERS)) files"
-	@echo "  Sources:    $(words $(SOURCES)) files"
+	@echo "  Sources:    $(SOURCES)"
+	@echo "  MOC Headers: $(MOC_HEADERS)"
 	@echo "  MOC files:  $(words $(MOC_SOURCES)) files"

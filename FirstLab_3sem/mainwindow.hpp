@@ -5,7 +5,7 @@
 #include <QLabel>
 
 #include "Boyer-widget.hpp"
-#include "NFA-windget.hpp"
+#include "NFA-widget.hpp"
 #include "SpellChecker-widget.hpp"
 
 class MainWindow : public QMainWindow {

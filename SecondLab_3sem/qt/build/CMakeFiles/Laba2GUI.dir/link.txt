@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/Laba2GUI.dir/link.d CMakeFiles/Laba2GUI.dir/Laba2GUI_autogen/mocs_compilation.cpp.o CMakeFiles/Laba2GUI.dir/main_qt.cpp.o CMakeFiles/Laba2GUI.dir/main_window.cpp.o -o Laba2GUI  /usr/lib/libQt6Widgets.so.6.10.1 /usr/lib/libQt6Gui.so.6.10.1 /usr/lib/libGLX.so /usr/lib/libOpenGL.so /usr/lib/libQt6Core.so.6.10.1

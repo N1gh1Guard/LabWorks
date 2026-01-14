@@ -1,0 +1,5 @@
+/home/linuxovichock/Documents/Learning/MEPhI/Programming/LabWorks/SecondLab_3sem/qt/build/CMakeFiles/Laba2GUI.dir
+/home/linuxovichock/Documents/Learning/MEPhI/Programming/LabWorks/SecondLab_3sem/qt/build/CMakeFiles/edit_cache.dir
+/home/linuxovichock/Documents/Learning/MEPhI/Programming/LabWorks/SecondLab_3sem/qt/build/CMakeFiles/rebuild_cache.dir
+/home/linuxovichock/Documents/Learning/MEPhI/Programming/LabWorks/SecondLab_3sem/qt/build/CMakeFiles/Laba2GUI_autogen_timestamp_deps.dir
+/home/linuxovichock/Documents/Learning/MEPhI/Programming/LabWorks/SecondLab_3sem/qt/build/CMakeFiles/Laba2GUI_autogen.dir
