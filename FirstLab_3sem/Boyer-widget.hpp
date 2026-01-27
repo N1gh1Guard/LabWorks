@@ -15,6 +15,7 @@ public:
     explicit BoyerWidget(QWidget *parent = nullptr);
 
 private slots:
+    void onLoadFile();
     void onSearch();
     void onSearchAll();
     void onClear();
@@ -23,10 +24,11 @@ private:
     void setupUI();
     void displayResults(const std::vector<int>& results);
 
-    QLineEdit *textInput = nullptr;
+    QTextEdit *textInput = nullptr;
     QLineEdit *patternInput = nullptr;
     QTextEdit *outputText = nullptr;
 
+    QPushButton *loadFileBtn = nullptr;
     QPushButton *searchFirstBtn = nullptr;
     QPushButton *searchAllBtn = nullptr;
     QPushButton *clearBtn = nullptr;

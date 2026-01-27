@@ -15,8 +15,12 @@ MOC = moc
 QT_CFLAGS = $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets)
 QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Gui Qt5Widgets)
 
-CXXFLAGS += $(QT_CFLAGS)
-LDFLAGS = $(QT_LIBS)
+# Hunspell Flags (optional)
+HUNSPELL_CFLAGS = $(shell pkg-config --cflags hunspell 2>/dev/null || echo "")
+HUNSPELL_LIBS = $(shell pkg-config --libs hunspell 2>/dev/null || echo "")
+
+CXXFLAGS += $(QT_CFLAGS) $(HUNSPELL_CFLAGS)
+LDFLAGS = $(QT_LIBS) $(HUNSPELL_LIBS)
 
 # ═══════════════════════════════════════════════════════════════
 # DIRECTORIES
@@ -85,7 +89,7 @@ $(BUILD_DIR):
 # PHONY TARGETS
 # ═══════════════════════════════════════════════════════════════
 
-.PHONY: all clean run test install help info
+.PHONY: all clean run test install help info deps
 
 run: $(TARGET)
 	@echo "Running $(TARGET)..."
@@ -101,10 +105,21 @@ clean:
 	rm -rf $(BUILD_DIR)
 	@echo "✓ Clean complete"
 
+deps:
+	@echo "Checking dependencies..."
+	@echo "Required packages on Arch Linux:"
+	@echo "  pacman -S base-devel qt5-base hunspell-ru"
+	@echo ""
+	@echo "Checking installation status:"
+	@which g++ > /dev/null && echo "✓ g++ found" || echo "✗ g++ NOT found"
+	@which moc > /dev/null && echo "✓ moc found" || echo "✗ moc NOT found"
+	@test -f /usr/share/hunspell/ru_RU.dic && echo "✓ hunspell-ru found" || echo "✗ hunspell-ru NOT found (install: sudo pacman -S hunspell-ru)"
+
 install: $(TARGET)
 	@echo "Installing to /usr/local/bin/..."
 	sudo cp $(TARGET) /usr/local/bin/streamlab
 	@echo "✓ Installation complete"
+	@echo "Run with: streamlab"
 
 help:
 	@echo "Stream Lab - Build System"
@@ -114,12 +129,13 @@ help:
 	@echo "  make run      - Build and run the application"
 	@echo "  make test     - Build and run unit tests"
 	@echo "  make clean    - Remove build artifacts"
+	@echo "  make deps     - Check dependencies"
 	@echo "  make install  - Install binary to /usr/local/bin"
 	@echo "  make help     - Show this help message"
 	@echo "  make info     - Show build configuration"
 	@echo ""
 	@echo "Project: C++17 Stream Lab with Qt5"
-	@echo "Algorithms: Boyer-Moore, NFA→DFA, Spell Checker"
+	@echo "Algorithms: Boyer-Moore, NFA→DFA, Spell Checker (Russian Hunspell)"
 
 # ═══════════════════════════════════════════════════════════════
 # BUILD INFORMATION

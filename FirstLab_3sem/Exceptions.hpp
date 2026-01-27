@@ -32,3 +32,9 @@ public:
     StreamClosedException() 
         : StreamException("Stream is closed") {}
 };
+
+class StreamNotOpenException : public StreamException {
+public:
+    StreamNotOpenException() 
+        : StreamException("Stream is not open") {}
+};

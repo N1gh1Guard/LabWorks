@@ -5,15 +5,18 @@
 #include <QString>
 
 NFAWidget::NFAWidget(QWidget *parent)
-    : QWidget(parent) {
+    : QWidget(parent), currentDFA(nullptr) {
     setupUI();
     setupExamples();
+}
+
+NFAWidget::~NFAWidget() {
+    delete currentDFA;
 }
 
 void NFAWidget::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     
-    // Примеры
     QHBoxLayout *exampleLayout = new QHBoxLayout();
     exampleLayout->addWidget(new QLabel("Примеры:"));
     examplesCombo = new QComboBox();
@@ -21,7 +24,6 @@ void NFAWidget::setupUI() {
     exampleLayout->addStretch();
     mainLayout->addLayout(exampleLayout);
     
-    // Входные данные
     QHBoxLayout *testLayout = new QHBoxLayout();
     testLayout->addWidget(new QLabel("Проверить строку:"));
     testStringInput = new QLineEdit();
@@ -29,7 +31,6 @@ void NFAWidget::setupUI() {
     testLayout->addWidget(testStringInput);
     mainLayout->addLayout(testLayout);
     
-    // Кнопки
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     convertBtn = new QPushButton("Конвертировать NFA в DFA");
     testBtn = new QPushButton("Проверить строку");
@@ -47,13 +48,11 @@ void NFAWidget::setupUI() {
     buttonLayout->addWidget(clearBtn);
     mainLayout->addLayout(buttonLayout);
     
-    // Выведение
     mainLayout->addWidget(new QLabel("Результаты:"));
     outputText = new QTextEdit();
     outputText->setReadOnly(true);
-    mainLayout->addWidget(outputText);
+    mainLayout->addWidget(outputText, 1);
     
-    // Статус
     statusLabel = new QLabel("Готово");
     mainLayout->addWidget(statusLabel);
     
@@ -64,14 +63,89 @@ void NFAWidget::setupExamples() {
     examplesCombo->addItem("a|b (a или b)");
     examplesCombo->addItem("ab* (a потом b*)");
     examplesCombo->addItem("(a|b)* (любая комбинация a и b)");
+    connect(examplesCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &NFAWidget::onExampleChanged);
+}
+
+NFAtoDFAConverter::NFA NFAWidget::createNFAForExample(int index) {
+    NFAtoDFAConverter::NFA nfa;
+    
+    switch (index) {
+        case 0: {
+            nfa.states = {0, 1, 2, 3};
+            nfa.alphabet = {'a', 'b'};
+            nfa.initialState = 0;
+            nfa.acceptingStates = {3};
+            nfa.epsilonTransitions[0] = {1, 2};
+            nfa.transitions[{1, 'a'}] = {3};
+            nfa.transitions[{2, 'b'}] = {3};
+            break;
+        }
+        case 1: {
+            nfa.states = {0, 1, 2};
+            nfa.alphabet = {'a', 'b'};
+            nfa.initialState = 0;
+            nfa.acceptingStates = {2};
+            nfa.transitions[{0, 'a'}] = {1};
+            nfa.transitions[{1, 'b'}] = {1};
+            nfa.epsilonTransitions[1] = {2};
+            break;
+        }
+        case 2: {
+            nfa.states = {0, 1, 2};
+            nfa.alphabet = {'a', 'b'};
+            nfa.initialState = 0;
+            nfa.acceptingStates = {0, 2};
+            nfa.epsilonTransitions[0] = {1};
+            nfa.transitions[{1, 'a'}] = {2};
+            nfa.transitions[{1, 'b'}] = {2};
+            nfa.epsilonTransitions[2] = {1};
+            break;
+        }
+    }
+    
+    return nfa;
+}
+
+void NFAWidget::onExampleChanged(int /*index*/) {
+    delete currentDFA;
+    currentDFA = nullptr;
+    outputText->clear();
+    statusLabel->setText("Выбран новый пример");
 }
 
 void NFAWidget::onConvert() {
-    outputText->setText("Конверсия NFA в DFA...\n"
-                       "Используется Powerset Construction\n"
-                       "Обработка epsilon-переходов\n"
-                       "Статус: успешно");
-    statusLabel->setText("✓ NFA конвертирован в DFA");
+    int exampleIndex = examplesCombo->currentIndex();
+    if (exampleIndex < 0) {
+        statusLabel->setText("Ошибка: выберите пример");
+        return;
+    }
+    
+    NFAtoDFAConverter::NFA nfa = createNFAForExample(exampleIndex);
+    
+    try {
+        NFAtoDFAConverter::DFA dfa = NFAtoDFAConverter::Convert(nfa);
+        delete currentDFA;
+        currentDFA = new NFAtoDFAConverter::DFA(dfa);
+        
+        auto info = NFAtoDFAConverter::GetDFAInfo(dfa);
+        QString output = QString(
+            "✓ Конверсия NFA в DFA завершена успешно!\n\n"
+            "Метод: Powerset Construction\n"
+            "Обработка epsilon-переходов: ✓\n\n"
+            "Статистика DFA:\n"
+            "  Состояний: %1\n"
+            "  Переходов: %2\n"
+            "  Принимающих состояний: %3\n\n"
+            "Используйте 'Проверить строку' для тестирования."
+        ).arg(info.statesCount).arg(info.transitionsCount).arg(info.acceptingStatesCount);
+        
+        outputText->setText(output);
+        statusLabel->setText(QString("✓ NFA конвертирован в DFA (%1 состояний)").arg(info.statesCount));
+    } catch (const std::exception& e) {
+        outputText->setText(QString("Ошибка конверсии: %1").arg(e.what()));
+        statusLabel->setText("⨯ Ошибка конверсии");
+    }
 }
 
 void NFAWidget::onTestString() {
@@ -82,22 +156,38 @@ void NFAWidget::onTestString() {
         return;
     }
     
-    outputText->setText(QString(
-        "Проверка строки: '%1'\n"
-        "Статус: строка принята автоматом\n"
-        "Пройденные состояния: q0 -> q1 -> q2"
-    ).arg(testStringInput->text()));
-    statusLabel->setText("✓ Строка принята");
+    if (!currentDFA) {
+        statusLabel->setText("Ошибка: сначала конвертируйте NFA в DFA");
+        outputText->setText("Сначала нажмите 'Конвертировать NFA в DFA' для выбранного примера.");
+        return;
+    }
+    
+    bool accepted = NFAtoDFAConverter::AcceptsString(*currentDFA, testStr);
+    
+    QString output = QString("Проверка строки: '%1'\n\n").arg(testStringInput->text());
+    
+    if (accepted) {
+        output += "✓ Строка ПРИНЯТА автоматом\n";
+        output += "Строка соответствует регулярному выражению.";
+        statusLabel->setText("✓ Строка принята");
+    } else {
+        output += "⨯ Строка ОТКЛОНЕНА автоматом\n";
+        output += "Строка не соответствует регулярному выражению.";
+        statusLabel->setText("⨯ Строка отклонена");
+    }
+    
+    outputText->setText(output);
 }
 
 void NFAWidget::onVisualize() {
-    outputText->setText(
-        "Визуализация DFA:\n"
-        "q0 --a--> q1\n"
-        "q0 --b--> q2\n"
-        "q1 --ε--> q2\n"
-        "q2 (принимающее состояние)"
-    );
+    if (!currentDFA) {
+        statusLabel->setText("Ошибка: сначала конвертируйте NFA в DFA");
+        outputText->setText("Сначала нажмите 'Конвертировать NFA в DFA' для выбранного примера.");
+        return;
+    }
+    
+    QString visualization = NFAtoDFAConverter::VisualizeDFA(*currentDFA).c_str();
+    outputText->setText(visualization);
     statusLabel->setText("✓ Визуализация готова");
 }
 

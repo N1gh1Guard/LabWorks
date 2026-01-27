@@ -3,7 +3,13 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QString>
-#include <QSplitter>
+#include <QFileDialog>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QMessageBox>
+#include <QDir>
+#include <QStandardPaths>
 
 BoyerWidget::BoyerWidget(QWidget *parent)
     : QWidget(parent) {
@@ -13,24 +19,25 @@ BoyerWidget::BoyerWidget(QWidget *parent)
 void BoyerWidget::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     
-    // Входные поля
     QHBoxLayout *inputLayout = new QHBoxLayout();
     inputLayout->addWidget(new QLabel("Текст:"));
-    textInput = new QLineEdit();
+    textInput = new QTextEdit();
     textInput->setPlaceholderText("Введите текст для поиска...");
-    inputLayout->addWidget(textInput);
+    textInput->setMinimumHeight(100);
+    inputLayout->addWidget(textInput, 1);
+    mainLayout->addLayout(inputLayout);
     
     QHBoxLayout *patternLayout = new QHBoxLayout();
     patternLayout->addWidget(new QLabel("Паттерн:"));
     patternInput = new QLineEdit();
     patternInput->setPlaceholderText("Введите паттерн для поиска...");
     patternLayout->addWidget(patternInput);
-    
-    mainLayout->addLayout(inputLayout);
     mainLayout->addLayout(patternLayout);
     
-    // Кнопки
     QHBoxLayout *buttonLayout = new QHBoxLayout();
+    loadFileBtn = new QPushButton("Загрузить файл");
+    connect(loadFileBtn, &QPushButton::clicked, this, &BoyerWidget::onLoadFile);
+    buttonLayout->addWidget(loadFileBtn);
     searchFirstBtn = new QPushButton("Найти первое");
     searchAllBtn = new QPushButton("Найти все");
     clearBtn = new QPushButton("Очистить");
@@ -45,21 +52,49 @@ void BoyerWidget::setupUI() {
     buttonLayout->addStretch();
     mainLayout->addLayout(buttonLayout);
     
-    // Выходной текст
     mainLayout->addWidget(new QLabel("Результаты:"));
     outputText = new QTextEdit();
     outputText->setReadOnly(true);
-    mainLayout->addWidget(outputText);
+    mainLayout->addWidget(outputText, 1);
     
-    // Статус
     statusLabel = new QLabel("Готово");
     mainLayout->addWidget(statusLabel);
     
     setLayout(mainLayout);
 }
 
+void BoyerWidget::onLoadFile() {
+    QString initialDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    if (initialDir.isEmpty()) {
+        initialDir = QDir::homePath() + "/Downloads";
+    }
+    
+    QString fileName = QFileDialog::getOpenFileName(this,
+        "Загрузить текстовый файл", initialDir,
+        "Текстовые файлы (*.txt *.TXT *.Txt);;Все файлы (*.*)");
+    
+    if (fileName.isEmpty()) {
+        return;
+    }
+    
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "Ошибка", 
+            QString("Не удалось открыть файл: %1").arg(fileName));
+        return;
+    }
+    
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    QString content = in.readAll();
+    file.close();
+    
+    textInput->setPlainText(content);
+    statusLabel->setText(QString("✓ Файл загружен: %1").arg(QFileInfo(fileName).fileName()));
+}
+
 void BoyerWidget::onSearch() {
-    std::string text = textInput->text().toStdString();
+    std::string text = textInput->toPlainText().toStdString();
     std::string pattern = patternInput->text().toStdString();
     
     if (text.empty() || pattern.empty()) {
@@ -79,7 +114,7 @@ void BoyerWidget::onSearch() {
 }
 
 void BoyerWidget::onSearchAll() {
-    std::string text = textInput->text().toStdString();
+    std::string text = textInput->toPlainText().toStdString();
     std::string pattern = patternInput->text().toStdString();
     
     if (text.empty() || pattern.empty()) {

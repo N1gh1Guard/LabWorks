@@ -14,16 +14,19 @@ class NFAWidget : public QWidget {
 
 public:
     explicit NFAWidget(QWidget *parent = nullptr);
+    ~NFAWidget();
 
 private slots:
     void onConvert();
     void onTestString();
     void onVisualize();
     void onClear();
+    void onExampleChanged(int index);
 
 private:
     void setupUI();
     void setupExamples();
+    NFAtoDFAConverter::NFA createNFAForExample(int index);
 
     QLineEdit *testStringInput = nullptr;
     QTextEdit *outputText = nullptr;
@@ -36,4 +39,6 @@ private:
     QPushButton *clearBtn = nullptr;
 
     QLabel *statusLabel = nullptr;
+    
+    NFAtoDFAConverter::DFA *currentDFA = nullptr;
 };

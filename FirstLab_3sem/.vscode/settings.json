@@ -37,7 +37,12 @@
   "C_Cpp_Runner.warningsAsError": false,
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.linkerArgs": [],
-  "C_Cpp_Runner.includePaths": [],
+  "C_Cpp_Runner.includePaths": [
+    "/usr/include/qt",
+    "/usr/include/qt/QtCore",
+    "/usr/include/qt/QtGui",
+    "/usr/include/qt/QtWidgets"
+  ],
   "C_Cpp_Runner.includeSearch": [
     "*",
     "**/*"
