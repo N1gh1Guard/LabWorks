@@ -1,6 +1,6 @@
 # Stream Lab - Makefile
 # C++17 Project with Qt5
-# Boyer-Moore-Horspool, NFA→DFA, Spell Checker
+# Boyer-Moore-Horspool, Space Remover, Spell Checker
 # All files in single directory
 
 # ═══════════════════════════════════════════════════════════════
@@ -38,14 +38,14 @@ SOURCES = \
 	main.cpp \
 	mainwindow.cpp \
 	Boyer-widget.cpp \
-	NFA-widget.cpp \
+	SpaceRemover-widget.cpp \
 	SpellChecker-widget.cpp
 
 # Headers with Q_OBJECT that need MOC
 MOC_HEADERS = \
 	mainwindow.hpp \
 	Boyer-widget.hpp \
-	NFA-widget.hpp \
+	SpaceRemover-widget.hpp \
 	SpellChecker-widget.hpp
 
 # Generate MOC filenames
@@ -135,7 +135,7 @@ help:
 	@echo "  make info     - Show build configuration"
 	@echo ""
 	@echo "Project: C++17 Stream Lab with Qt5"
-	@echo "Algorithms: Boyer-Moore, NFA→DFA, Spell Checker (Russian Hunspell)"
+	@echo "Algorithms: Boyer-Moore, Space Remover, Spell Checker (Russian Hunspell)"
 
 # ═══════════════════════════════════════════════════════════════
 # BUILD INFORMATION

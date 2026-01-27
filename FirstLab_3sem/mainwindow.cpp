@@ -6,7 +6,6 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QMessageBox>
-#include <QSplitter>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
@@ -37,19 +36,17 @@ void MainWindow::setupUI() {
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
     
-    // Создаем вкладки
     tabWidget = new QTabWidget();
     boyerWidget = new BoyerWidget();
-    nfaWidget = new NFAWidget();
+    spaceRemoverWidget = new SpaceRemoverWidget();
     spellCheckerWidget = new SpellCheckerWidget();
     
     tabWidget->addTab(boyerWidget, "Boyer-Moore-Horspool");
-    tabWidget->addTab(nfaWidget, "NFA → DFA");
+    tabWidget->addTab(spaceRemoverWidget, "Space Remover");
     tabWidget->addTab(spellCheckerWidget, "Spell Checker");
     
     mainLayout->addWidget(tabWidget);
     
-    // Нижняя панель статуса
     statusLabel = new QLabel("Готово");
     mainLayout->addWidget(statusLabel);
     
@@ -61,17 +58,14 @@ void MainWindow::createMenuBar() {
     QMenuBar *menuBar = new QMenuBar(this);
     setMenuBar(menuBar);
     
-    // Меню File
     QMenu *fileMenu = menuBar->addMenu("&Файл");
     QAction *exitAction = fileMenu->addAction("&Выход");
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
     
-    // Меню Tools
     QMenu *toolsMenu = menuBar->addMenu("&Инструменты");
     QAction *testsAction = toolsMenu->addAction("&Запустить все тесты");
     connect(testsAction, &QAction::triggered, this, &MainWindow::onRunAllTests);
     
-    // Меню Help
     QMenu *helpMenu = menuBar->addMenu("&Справка");
     QAction *aboutAction = helpMenu->addAction("&О программе");
     connect(aboutAction, &QAction::triggered, this, &MainWindow::onAbout);
@@ -97,7 +91,7 @@ void MainWindow::onAbout() {
         "<p><b>Алгоритмы:</b></p>"
         "<ul>"
         "<li>Boyer-Moore-Horspool - оптимизированный поиск подстроки</li>"
-        "<li>NFA to DFA - конверсия автоматов</li>"
+        "<li>Space Remover - удаление множественных пробелов с помощью конечного автомата</li>"
         "<li>Spell Checker - проверка орфографии</li>"
         "</ul>"
         "<p><b>Язык:</b> C++17</p>"

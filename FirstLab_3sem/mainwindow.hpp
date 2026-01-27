@@ -5,7 +5,7 @@
 #include <QLabel>
 
 #include "Boyer-widget.hpp"
-#include "NFA-widget.hpp"
+#include "SpaceRemover-widget.hpp"
 #include "SpellChecker-widget.hpp"
 
 class MainWindow : public QMainWindow {
@@ -25,7 +25,7 @@ private:
 
     QTabWidget *tabWidget = nullptr;
     BoyerWidget *boyerWidget = nullptr;
-    NFAWidget *nfaWidget = nullptr;
+    SpaceRemoverWidget *spaceRemoverWidget = nullptr;
     SpellCheckerWidget *spellCheckerWidget = nullptr;
     QLabel *statusLabel = nullptr;
 };

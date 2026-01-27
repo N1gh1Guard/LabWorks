@@ -36,7 +36,6 @@ SpellCheckerWidget::~SpellCheckerWidget() {
 void SpellCheckerWidget::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // Информация о словаре
     QHBoxLayout *dictLayout = new QHBoxLayout();
     dictLayout->addWidget(new QLabel("Размер словаря:"));
     dictSizeLabel = new QLabel("0");
@@ -47,7 +46,6 @@ void SpellCheckerWidget::setupUI() {
     dictLayout->addStretch();
     mainLayout->addLayout(dictLayout);
 
-    // Проверка слова
     QGroupBox *wordGroup = new QGroupBox("Проверка слова");
     QVBoxLayout *wordLayout = new QVBoxLayout();
     QHBoxLayout *wordInputLayout = new QHBoxLayout();
@@ -74,7 +72,6 @@ void SpellCheckerWidget::setupUI() {
     wordGroup->setLayout(wordLayout);
     mainLayout->addWidget(wordGroup);
 
-    // Проверка текста
     QGroupBox *textGroup = new QGroupBox("Проверка текста");
     QVBoxLayout *textLayout = new QVBoxLayout();
     textLayout->addWidget(new QLabel("Текст:"));
@@ -95,7 +92,6 @@ void SpellCheckerWidget::setupUI() {
     textGroup->setLayout(textLayout);
     mainLayout->addWidget(textGroup);
 
-    // Результаты
     mainLayout->addWidget(new QLabel("Результаты:"));
     outputText = new QTextEdit();
     outputText->setReadOnly(true);
@@ -118,7 +114,6 @@ void SpellCheckerWidget::setupUI() {
 
 std::set<std::string> LoadRussianDictionaryFromHunspell() {
     std::set<std::string> dictionary;
-    
     std::vector<std::string> possiblePaths = {
         "/usr/share/hunspell/ru_RU.dic",
         "/usr/share/dict/russian",
@@ -163,7 +158,6 @@ std::set<std::string> LoadRussianDictionaryFromHunspell() {
 
 void SpellCheckerWidget::loadDefaultDictionary() {
 #ifdef HUNSPELL_AVAILABLE
-    // Пытаемся инициализировать Hunspell библиотеку
     std::vector<std::string> possibleDicPaths = {
         "/usr/share/hunspell/ru_RU.dic",
         "/usr/share/myspell/dicts/ru_RU.dic"
@@ -183,11 +177,9 @@ void SpellCheckerWidget::loadDefaultDictionary() {
     }
 #endif
     
-    // Загружаем словарь для подсказок
     std::set<std::string> dict = LoadRussianDictionaryFromHunspell();
     
     if (dict.empty()) {
-        // Fallback: показываем ошибку и предлагаем установить пакет
         statusLabel->setText("⚠️ Словарь не найден. Установи: sudo pacman -S hunspell-ru");
         dictSizeLabel->setText("0");
         QMessageBox::warning(this, "Словарь не найден",
@@ -363,7 +355,6 @@ void SpellCheckerWidget::onCheckText() {
 
     if (errorCount > 0) {
         output += "Неправильные слова (проверено через Hunspell):\n";
-        // Собираем неправильные слова заново
         QRegularExpression re("[^\\p{L}'\\-]+");
         QStringList words = qtext.split(re, Qt::SkipEmptyParts);
         for (const QString& word : words) {

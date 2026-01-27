@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include "Boyer-Moore-Horspool.hpp"
-#include "NFA-to-DFA.hpp"
+#include "SpaceRemover.hpp"
 #include "SpellChecker.hpp"
 
 class AlgorithmTests {
@@ -17,7 +17,7 @@ public:
         std::cout << "\n";
         std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
         std::cout << "║   ЗАПУСК ПОЛНОГО НАБОРА UNIT TESTS                                ║\n";
-        std::cout << "║   C++17 Stream Lab - Boyer-Moore, NFA→DFA, Spell Checker          ║\n";
+        std::cout << "║   C++17 Stream Lab - Boyer-Moore, Space Remover, Spell Checker    ║\n";
         std::cout << "╚════════════════════════════════════════════════════════════════════╝\n\n";
 
         int totalTests = 0;
@@ -32,13 +32,13 @@ public:
         totalTests += 10;  // Увеличено с 7 до 10
         passedTests += boyerPassed;
 
-        // NFA to DFA тесты
+        // Space Remover тесты
         std::cout << "\n═══════════════════════════════════════════════════════════════════\n";
-        std::cout << "2. NFA → DFA: Конверсия недетерминированных в детерминированные\n";
+        std::cout << "2. Space Remover: Удаление множественных пробелов (конечный автомат)\n";
         std::cout << "═══════════════════════════════════════════════════════════════════\n\n";
 
         auto nfaPassed = TestNFAtoDFA();
-        totalTests += 7;  // Увеличено с 3 до 7
+        totalTests += 10;  // Увеличено с 7 до 10
         passedTests += nfaPassed;
 
         // Spell Checker тесты
@@ -212,194 +212,196 @@ private:
     }
 
     // ════════════════════════════════════════════════════════════════
-    // NFA TO DFA ТЕСТЫ (7 тестов)
+    // УДАЛЕНИЕ МНОЖЕСТВЕННЫХ ПРОБЕЛОВ ТЕСТЫ (10 тестов)
     // ════════════════════════════════════════════════════════════════
 
     static int TestNFAtoDFA() {
         int passed = 0;
 
-        // Тест 1: Простая конверсия (a|b)
+        // Тест 1: Простое удаление двойных пробелов
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2, 3};
-                nfa.alphabet = {'a', 'b'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {3};
-                nfa.epsilonTransitions[0] = {1, 2};
-                nfa.transitions[{1, 'a'}] = {3};
-                nfa.transitions[{2, 'b'}] = {3};
+                std::string input = "hello  world";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                std::string expected = "hello world";
                 
-                NFAtoDFAConverter::DFA dfa = NFAtoDFAConverter::Convert(nfa);
-                
-                if (dfa.states.size() > 0 && dfa.acceptingStates.size() > 0) {
-                    std::cout << "  ✓ Test 1: Простая конверсия NFA в DFA (a|b)\n";
+                if (result == expected) {
+                    std::cout << "  ✓ Test 1: Удаление двойных пробелов\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 1 FAILED: DFA не создан корректно\n";
+                    std::cout << "  ⨯ Test 1 FAILED: ожидалось '" << expected 
+                              << "', получено '" << result << "'\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 1 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 2: NFA с epsilon-переходами (ab*)
+        // Тест 2: Множественные пробелы (3+)
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2};
-                nfa.alphabet = {'a', 'b'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {2};
-                nfa.transitions[{0, 'a'}] = {1};
-                nfa.transitions[{1, 'b'}] = {1};
-                nfa.epsilonTransitions[1] = {2};
+                std::string input = "text    with     many      spaces";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                std::string expected = "text with many spaces";
                 
-                NFAtoDFAConverter::DFA dfa = NFAtoDFAConverter::Convert(nfa);
-                auto info = NFAtoDFAConverter::GetDFAInfo(dfa);
-                
-                if (info.statesCount > 0 && info.transitionsCount > 0) {
-                    std::cout << "  ✓ Test 2: NFA с epsilon-переходами (ab*)\n";
+                if (result == expected) {
+                    std::cout << "  ✓ Test 2: Удаление множественных пробелов (3+)\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 2 FAILED: DFA не создан корректно\n";
+                    std::cout << "  ⨯ Test 2 FAILED: ожидалось '" << expected 
+                              << "', получено '" << result << "'\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 2 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 3: Проверка принятия строки (a|b)
+        // Тест 3: Текст без множественных пробелов
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2, 3};
-                nfa.alphabet = {'a', 'b'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {3};
-                nfa.epsilonTransitions[0] = {1, 2};
-                nfa.transitions[{1, 'a'}] = {3};
-                nfa.transitions[{2, 'b'}] = {3};
+                std::string input = "text with single spaces";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
                 
-                NFAtoDFAConverter::DFA dfa = NFAtoDFAConverter::Convert(nfa);
-                
-                bool acceptsA = NFAtoDFAConverter::AcceptsString(dfa, "a");
-                bool acceptsB = NFAtoDFAConverter::AcceptsString(dfa, "b");
-                bool rejectsC = !NFAtoDFAConverter::AcceptsString(dfa, "c");
-                
-                if (acceptsA && acceptsB && rejectsC) {
-                    std::cout << "  ✓ Test 3: Проверка принятия/отклонения строк (a|b)\n";
+                if (result == input) {
+                    std::cout << "  ✓ Test 3: Текст без множественных пробелов (без изменений)\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 3 FAILED: некорректное принятие/отклонение строк\n";
+                    std::cout << "  ⨯ Test 3 FAILED: текст не должен изменяться\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 3 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 4: Epsilon-замыкание для одного состояния
+        // Тест 4: Пробелы в начале и конце
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2};
-                nfa.alphabet = {'a'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {2};
-                nfa.epsilonTransitions[0] = {1};
-                nfa.epsilonTransitions[1] = {2};
-                nfa.transitions[{0, 'a'}] = {0};
+                std::string input = "   start  middle   end   ";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                std::string expected = " start middle end ";
                 
-                auto closure = NFAtoDFAConverter::EpsilonClosure(0, nfa);
-                if (closure.size() >= 3) {  // Должно включать 0, 1, 2 через epsilon
-                    std::cout << "  ✓ Test 4: Epsilon-замыкание для одного состояния\n";
+                if (result == expected) {
+                    std::cout << "  ✓ Test 4: Пробелы в начале и конце строки\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 4 FAILED: некорректное epsilon-замыкание\n";
+                    std::cout << "  ⨯ Test 4 FAILED: ожидалось '" << expected 
+                              << "', получено '" << result << "'\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 4 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 5: Epsilon-замыкание для набора состояний
+        // Тест 5: Различные типы пробелов (пробел, табуляция)
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2, 3};
-                nfa.alphabet = {'a'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {3};
-                nfa.epsilonTransitions[0] = {1};
-                nfa.epsilonTransitions[1] = {2};
-                nfa.epsilonTransitions[2] = {3};
+                std::string input = "word1\t\tword2    word3";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                // Табуляции и пробелы должны обрабатываться одинаково
                 
-                NFAtoDFAConverter::StateSet states = {0, 1};
-                auto closure = NFAtoDFAConverter::EpsilonClosureSet(states, nfa);
-                if (closure.size() >= 3) {
-                    std::cout << "  ✓ Test 5: Epsilon-замыкание для набора состояний\n";
+                if (result.find("\t\t") == std::string::npos && 
+                    result.find("    ") == std::string::npos) {
+                    std::cout << "  ✓ Test 5: Различные типы пробелов (пробел, табуляция)\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 5 FAILED: некорректное epsilon-замыкание набора\n";
+                    std::cout << "  ⨯ Test 5 FAILED: множественные пробелы не удалены\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 5 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 6: Move функция (переходы по символу)
+        // Тест 6: Пустая строка
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2};
-                nfa.alphabet = {'a', 'b'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {2};
-                nfa.transitions[{0, 'a'}] = {1};
-                nfa.transitions[{1, 'b'}] = {2};
+                std::string input = "";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
                 
-                NFAtoDFAConverter::StateSet states = {0};
-                auto afterMove = NFAtoDFAConverter::Move(states, 'a', nfa);
-                if (afterMove.size() == 1 && afterMove.count(1) > 0) {
-                    std::cout << "  ✓ Test 6: Move функция (переходы по символу)\n";
+                if (result == input) {
+                    std::cout << "  ✓ Test 6: Пустая строка\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 6 FAILED: некорректная функция Move\n";
+                    std::cout << "  ⨯ Test 6 FAILED: пустая строка должна остаться пустой\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 6 FAILED: " << e.what() << "\n";
             }
         }
 
-        // Тест 7: Сложный NFA с циклом ((a|b)*)
+        // Тест 7: Статистика обработки
         {
             try {
-                NFAtoDFAConverter::NFA nfa;
-                nfa.states = {0, 1, 2};
-                nfa.alphabet = {'a', 'b'};
-                nfa.initialState = 0;
-                nfa.acceptingStates = {0, 2};
-                nfa.epsilonTransitions[0] = {1};
-                nfa.transitions[{1, 'a'}] = {2};
-                nfa.transitions[{1, 'b'}] = {2};
-                nfa.epsilonTransitions[2] = {1};
+                std::string input = "text  with    many     spaces";
+                auto stats = SpaceRemover::ProcessWithStats(input);
                 
-                NFAtoDFAConverter::DFA dfa = NFAtoDFAConverter::Convert(nfa);
-                
-                // Должен принимать пустую строку, "a", "b", "ab", "ba", и т.д.
-                bool acceptsEmpty = NFAtoDFAConverter::AcceptsString(dfa, "");
-                bool acceptsA = NFAtoDFAConverter::AcceptsString(dfa, "a");
-                bool acceptsB = NFAtoDFAConverter::AcceptsString(dfa, "b");
-                bool acceptsAB = NFAtoDFAConverter::AcceptsString(dfa, "ab");
-                
-                if (acceptsEmpty && acceptsA && acceptsB && acceptsAB) {
-                    std::cout << "  ✓ Test 7: Сложный NFA с циклом ((a|b)*)\n";
+                if (stats.originalLength > stats.resultLength && 
+                    stats.spacesRemoved > 0) {
+                    std::cout << "  ✓ Test 7: Статистика обработки\n";
                     passed++;
                 } else {
-                    std::cout << "  ⨯ Test 7 FAILED: некорректная обработка цикла\n";
+                    std::cout << "  ⨯ Test 7 FAILED: некорректная статистика\n";
                 }
             } catch (const std::exception& e) {
                 std::cout << "  ⨯ Test 7 FAILED: " << e.what() << "\n";
+            }
+        }
+
+        // Тест 8: Только пробелы
+        {
+            try {
+                std::string input = "      ";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                std::string expected = " ";
+                
+                if (result == expected) {
+                    std::cout << "  ✓ Test 8: Строка только из пробелов\n";
+                    passed++;
+                } else {
+                    std::cout << "  ⨯ Test 8 FAILED: ожидалось '" << expected 
+                              << "', получено '" << result << "'\n";
+                }
+            } catch (const std::exception& e) {
+                std::cout << "  ⨯ Test 8 FAILED: " << e.what() << "\n";
+            }
+        }
+
+        // Тест 9: Смешанные пробелы и символы
+        {
+            try {
+                std::string input = "a  b   c    d";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                std::string expected = "a b c d";
+                
+                if (result == expected) {
+                    std::cout << "  ✓ Test 9: Смешанные пробелы и символы\n";
+                    passed++;
+                } else {
+                    std::cout << "  ⨯ Test 9 FAILED: ожидалось '" << expected 
+                              << "', получено '" << result << "'\n";
+                }
+            } catch (const std::exception& e) {
+                std::cout << "  ⨯ Test 9 FAILED: " << e.what() << "\n";
+            }
+        }
+
+        // Тест 10: Многострочный текст
+        {
+            try {
+                std::string input = "line1  \n  line2    \n    line3";
+                std::string result = SpaceRemover::RemoveMultipleSpaces(input);
+                // Переносы строк не должны удаляться, но множественные пробелы должны
+                
+                bool hasNewlines = result.find('\n') != std::string::npos;
+                bool noMultipleSpaces = result.find("  ") == std::string::npos;
+                
+                if (hasNewlines && noMultipleSpaces) {
+                    std::cout << "  ✓ Test 10: Многострочный текст\n";
+                    passed++;
+                } else {
+                    std::cout << "  ⨯ Test 10 FAILED: некорректная обработка многострочного текста\n";
+                }
+            } catch (const std::exception& e) {
+                std::cout << "  ⨯ Test 10 FAILED: " << e.what() << "\n";
             }
         }
 
