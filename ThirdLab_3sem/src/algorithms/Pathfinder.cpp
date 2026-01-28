@@ -51,14 +51,30 @@ PathResult Pathfinder::findShortestPath(const Graph& graph, int start, int end) 
             if (!visited[v]) {
                 double newDist = distances[u] + weight;
                 
-                if (newDist < distances[v]) {
+                const double absEpsilon = 1e-12;
+                const double relEpsilon = 1e-14;
+                const double maxDist = std::max(std::abs(newDist), std::abs(distances[v]));
+                const double epsilon = absEpsilon + relEpsilon * std::max(1.0, maxDist);
+                
+                const double diff = newDist - distances[v];
+                
+                if (diff < -epsilon) {
                     distances[v] = newDist;
                     predecessors[v].clear();
                     predecessors[v].push_back(u);
                     pq.push({v, newDist});
                 }
-                else if (std::abs(newDist - distances[v]) < 1e-9) {
-                    predecessors[v].push_back(u);
+                else if (std::abs(diff) <= epsilon) {
+                    bool found = false;
+                    for (int pred : predecessors[v]) {
+                        if (pred == u) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        predecessors[v].push_back(u);
+                    }
                 }
             }
         }
@@ -119,14 +135,30 @@ std::vector<PathResult> Pathfinder::findAllShortestPaths(const Graph& graph, int
             if (!visited[v]) {
                 double newDist = distances[u] + weight;
                 
-                if (newDist < distances[v]) {
+                const double absEpsilon = 1e-12;
+                const double relEpsilon = 1e-14;
+                const double maxDist = std::max(std::abs(newDist), std::abs(distances[v]));
+                const double epsilon = absEpsilon + relEpsilon * std::max(1.0, maxDist);
+                
+                const double diff = newDist - distances[v];
+                
+                if (diff < -epsilon) {
                     distances[v] = newDist;
                     predecessors[v].clear();
                     predecessors[v].push_back(u);
                     pq.push({v, newDist});
                 }
-                else if (std::abs(newDist - distances[v]) < 1e-9) {
-                    predecessors[v].push_back(u);
+                else if (std::abs(diff) <= epsilon) {
+                    bool found = false;
+                    for (int pred : predecessors[v]) {
+                        if (pred == u) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        predecessors[v].push_back(u);
+                    }
                 }
             }
         }
@@ -194,14 +226,30 @@ void Pathfinder::dijkstra(const Graph& graph, int start,
             if (!visited[v]) {
                 double newDist = distances[u] + weight;
                 
-                if (newDist < distances[v]) {
+                const double absEpsilon = 1e-12;
+                const double relEpsilon = 1e-14;
+                const double maxDist = std::max(std::abs(newDist), std::abs(distances[v]));
+                const double epsilon = absEpsilon + relEpsilon * std::max(1.0, maxDist);
+                
+                const double diff = newDist - distances[v];
+                
+                if (diff < -epsilon) {
                     distances[v] = newDist;
                     predecessors[v].clear();
                     predecessors[v].push_back(u);
                     pq.push({v, newDist});
                 }
-                else if (std::abs(newDist - distances[v]) < 1e-9) {
-                    predecessors[v].push_back(u);
+                else if (std::abs(diff) <= epsilon) {
+                    bool found = false;
+                    for (int pred : predecessors[v]) {
+                        if (pred == u) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        predecessors[v].push_back(u);
+                    }
                 }
             }
         }

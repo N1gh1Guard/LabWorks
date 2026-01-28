@@ -130,20 +130,16 @@ void MapWidget::paintEvent(QPaintEvent* event) {
             int y = row * cellHeight_;
             QRect cellRect(x, y, cellWidth_, cellHeight_);
 
-            // Базовый градиент
             QLinearGradient grad(x, y, x + cellWidth_, y + cellHeight_);
             grad.setColorAt(0, base.lighter(115));
             grad.setColorAt(0.5, base);
             grad.setColorAt(1, base.darker(115));
             painter.fillRect(cellRect, grad);
 
-            // Добавляем текстуру
             drawCellTexture(painter, cellRect, cell.getTerrainType(), base);
 
-            // Отображаем скорость (стоимость прохождения)
             drawCellSpeed(painter, cellRect, cell.getTerrainType());
 
-            // Рамка
             painter.setPen(QPen(base.lighter(130), 1));
             painter.drawLine(x, y, x + cellWidth_, y);
             painter.drawLine(x, y, x, y + cellHeight_);
@@ -245,7 +241,6 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
     
     switch (terrain) {
         case TerrainType::Grass: {
-            // Точки для травы
             int dotSize = std::max(1, size / 8);
             int spacing = size / 4;
             for (int y = rect.top() + spacing/2; y < rect.bottom(); y += spacing) {
@@ -257,7 +252,6 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
             break;
         }
         case TerrainType::Sand: {
-            // Волнистые линии для песка
             int lineSpacing = size / 6;
             for (int y = rect.top(); y < rect.bottom(); y += lineSpacing) {
                 QPainterPath path;
@@ -272,12 +266,10 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
         }
         case TerrainType::Water:
         case TerrainType::DeepWater: {
-            // Горизонтальные линии для воды
             int lineSpacing = size / 5;
             for (int y = rect.top(); y < rect.bottom(); y += lineSpacing) {
                 painter.drawLine(rect.left(), y, rect.right(), y);
             }
-            // Добавляем небольшие круги для волн
             if (size > 15) {
                 int waveSize = std::max(2, size / 10);
                 for (int i = 0; i < 3; ++i) {
@@ -290,7 +282,6 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
             break;
         }
         case TerrainType::Forest: {
-            // Штриховка для леса
             int lineSpacing = size / 4;
             for (int i = 0; i < 3; ++i) {
                 int offset = i * lineSpacing / 3;
@@ -298,7 +289,6 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
                     painter.drawLine(rect.left(), y, rect.right(), y);
                 }
             }
-            // Добавляем вертикальные линии
             for (int x = rect.left() + lineSpacing/2; x < rect.right(); x += lineSpacing) {
                 painter.drawLine(x, rect.top(), x, rect.bottom());
             }
@@ -314,10 +304,9 @@ void MapWidget::drawCellTexture(QPainter& painter, const QRect& rect, TerrainTyp
 void MapWidget::drawCellSpeed(QPainter& painter, const QRect& rect, TerrainType terrain) {
     double speed = TerrainTypeHelper::getDefaultTraversalTime(terrain);
     
-    // Показываем скорость только если клетка достаточно большая
     int minSize = std::min(rect.width(), rect.height());
     if (minSize < 20) {
-        return; // Слишком маленькая клетка
+        return;
     }
     
     painter.save();
@@ -329,13 +318,11 @@ void MapWidget::drawCellSpeed(QPainter& painter, const QRect& rect, TerrainType 
         speedText = QString::number(speed, 'f', 1);
     }
     
-    // Выбираем цвет текста в зависимости от фона
     QColor textColor = QColor(255, 255, 255);
     if (terrain == TerrainType::Grass || terrain == TerrainType::Sand) {
         textColor = QColor(0, 0, 0);
     }
     
-    // Рисуем полупрозрачный фон для текста для лучшей читаемости
     QColor bgColor = QColor(0, 0, 0);
     bgColor.setAlpha(120);
     int padding = 2;
@@ -345,7 +332,6 @@ void MapWidget::drawCellSpeed(QPainter& painter, const QRect& rect, TerrainType 
                  minSize/4 + padding*2);
     painter.fillRect(textBg, bgColor);
     
-    // Рисуем текст
     painter.setPen(QPen(textColor, 1));
     QFont font = painter.font();
     font.setBold(true);
@@ -365,15 +351,12 @@ void MapWidget::drawFlag(QPainter& painter, int centerX, int centerY, int cellWi
     int flagWidth = flagSize;
     int flagHeight = flagSize * 2 / 3;
     
-    // Рисуем флагшток
     painter.setPen(QPen(QColor(101, 67, 33), 3));
     painter.drawLine(centerX, centerY - poleHeight, centerX, centerY + poleHeight / 2);
     
-    // Рисуем флаг
     QRect flagRect(centerX + 2, centerY - poleHeight, flagWidth, flagHeight);
     
     if (isStart) {
-        // Зеленый флаг старта
         QLinearGradient flagGrad(flagRect.topLeft(), flagRect.bottomRight());
         flagGrad.setColorAt(0, QColor(50, 200, 50));
         flagGrad.setColorAt(1, QColor(30, 150, 30));
@@ -381,7 +364,6 @@ void MapWidget::drawFlag(QPainter& painter, int centerX, int centerY, int cellWi
         painter.setPen(QPen(QColor(20, 120, 20), 2));
         painter.drawRect(flagRect);
         
-        // Белая галочка
         painter.setPen(QPen(QColor(255, 255, 255), 3));
         painter.setBrush(Qt::NoBrush);
         int checkSize = flagHeight / 3;
@@ -389,7 +371,6 @@ void MapWidget::drawFlag(QPainter& painter, int centerX, int centerY, int cellWi
         painter.drawLine(checkStart, QPointF(checkStart.x() - checkSize/2.0, checkStart.y()));
         painter.drawLine(checkStart, QPointF(checkStart.x(), checkStart.y() + checkSize));
     } else {
-        // Красный флаг финиша
         QLinearGradient flagGrad(flagRect.topLeft(), flagRect.bottomRight());
         flagGrad.setColorAt(0, QColor(255, 50, 50));
         flagGrad.setColorAt(1, QColor(200, 20, 20));
@@ -397,7 +378,6 @@ void MapWidget::drawFlag(QPainter& painter, int centerX, int centerY, int cellWi
         painter.setPen(QPen(QColor(150, 10, 10), 2));
         painter.drawRect(flagRect);
         
-        // Белый крестик
         painter.setPen(QPen(QColor(255, 255, 255), 3));
         painter.setBrush(Qt::NoBrush);
         int crossSize = flagHeight / 3;
